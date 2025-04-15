@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard with Chart</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            min-height: 100vh;
+            background-color: #000000;
+            color: #ffffff;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+        .dashboard-container h1 {
+            font-size: 3em;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 20px;
+            color: #4caf50;
+        }
+        .dashboard-container p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+        }
+        .btn-custom {
+            background-color: #4caf50;
+            color: #ffffff;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+        }
+        .btn-custom:hover {
+            background-color: #388e3c;
+            transform: translateY(-5px);
+        }
+        .filter-section {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+        .filter-section form {
+            width: 100%;
+            max-width: 800px;
+        }
+        .chart-container {
+            margin-top: 40px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            color: #ffffff;
+        }
+        .chart-container canvas {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="dashboard-container">
+        <h1 class="text-center">Dashboard</h1>
+        <p class="text-center">View and filter commodity price predictions below.</p>
+
+        <div class="filter-section">
+            <form method="GET" action="/dashboard" class="row g-3 justify-content-center">
+                <div class="col-md-4">
+                    <label for="crop" class="form-label">Crop</label>
+                    <select id="crop" name="crop" class="form-select">
+                        <option value="">Select Crop</option>
+                        <option value="Sugar">Sugar</option>
+                        <option value="Maize">Maize</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="region" class="form-label">Region</label>
+                    <select id="region" name="region" class="form-select">
+                        <option value="">Select Region</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Sindh">Sindh</option>
+                        <option value="KPK">KPK</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="button" id="showGraph" class="btn btn-custom w-100">Show Graph</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="chart-container" style="display: none;" id="chartContainer">
+            <canvas id="sugarChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('showGraph').addEventListener('click', function() {
+            const chartContainer = document.getElementById('chartContainer');
+            const crop = document.getElementById('crop').value;
+            const region = document.getElementById('region').value;
+            
+            // Fetch data based on selected crop and region
+            fetch(`/get_sugar_data?crop=${crop}&region=${region}`)
+                .then(response => response.json())
+                .then(data => {
+                    chartContainer.style.display = 'block';
+                    const ctx = document.getElementById('sugarChart').getContext('2d');
+                    
+                    // Check if the chart already exists and destroy it if it does
+                    if (typeof window.sugarChart !== 'undefined' && window.sugarChart instanceof Chart) {
+                        window.sugarChart.destroy();
+                    }
+    
+                    // Calculate the min and max for the y-axis dynamically
+                    const allPrices = [...data.actual_prices, ...data.predicted_prices].filter(price => price !== null);
+                    const minPrice = Math.min(...allPrices);
+                    const maxPrice = Math.max(...allPrices);
+    
+                    // Initialize a new chart and assign it to window.sugarChart
+                    window.sugarChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.dates,
+                            datasets: [
+                                {
+                                    label: 'Actual Prices (until 2018)',
+                                    data: data.actual_prices,
+                                    borderColor: 'rgba(76, 175, 80, 1)',
+                                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                    fill: false,
+                                    tension: 0.1,
+                                    pointStyle: 'circle',
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5
+                                },
+                                {
+                                    label: 'Predicted Prices (from 2019)',
+                                    data: data.predicted_prices,
+                                    borderColor: 'rgba(255, 87, 34, 1)',
+                                    backgroundColor: 'rgba(255, 87, 34, 0.2)',
+                                    fill: false,
+                                    tension: 0.1,
+                                    pointStyle: 'circle',
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'year',
+                                        tooltipFormat: 'YYYY',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Year',
+                                        color: '#ffffff'
+                                    },
+                                    ticks: {
+                                        color: '#ffffff'
+                                    },
+                                    min: '2010-01-01',
+                                    max: '2021-12-31'
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Price',
+                                        color: '#ffffff'
+                                    },
+                                    ticks: {
+                                        color: '#ffffff'
+                                    },
+                                    min: minPrice - 10,  // Add padding to the minimum value
+                                    max: maxPrice + 10   // Add padding to the maximum value
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        color: '#ffffff'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: `${crop} Price Trends (Actual vs Predicted) for ${region}`,
+                                    color: '#ffffff'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    alert('Error fetching data. Please ensure the data is available for the selected region.');
+                });
+        });
+    </script>
+    
+    
+</body>
+</html>

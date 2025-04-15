@@ -1,0 +1,62 @@
+<!-- templates/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a href="/home" class="navbar-brand d-flex align-items-center">
+            <span style="font-size: 1.5em; color: #ffffff;">PricePulse</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="/ur/home" style="font-size: 1.2em;">
+                        <i class="fas fa-home"></i> ہوم
+                    </a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#" style="font-size: 1.2em;">
+                        <i class="fas fa-user"></i> پروفائل
+                    </a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="/ur/dashboard" style="font-size: 1.2em;">
+                        <i class="fas fa-chart-line"></i> ڈیش بورڈ
+                    </a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#" style="font-size: 1.2em;">
+                        <i class="fas fa-bell"></i> اطلاعات
+                    </a>
+                </li>
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="/ur/help-centre" style="font-size: 1.2em;">
+                        <i class="fas fa-question-circle"></i> مدد مرکز
+                    </a>                    
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item mx-3">
+                    <a class="nav-link" href="#" style="font-size: 1.2em;">
+                        <i class="fas fa-sign-out-alt"></i> لاگ آؤٹ
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+.navbar-nav .nav-link i {
+    font-size: 1.2em; /* Matches icon size with text */
+    margin-right: 5px; /* Adds space between icon and text */
+    vertical-align: middle; /* Aligns icons with text */
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center; /* Aligns icon and text vertically */
+}
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

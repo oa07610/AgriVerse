@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Centre</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Open Sans', sans-serif;
+        }
+        .faq-container {
+            max-width: 1500px; /* Increased width */
+            margin: 50px auto;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            text-align: left;
+        }
+        .faq-container h1 {
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            color: #4caf50;
+            text-align: center;
+        }
+        .faq-item {
+            margin-bottom: 25px;
+        }
+        .faq-item h5 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .faq-item p {
+            font-size: 1.35em;
+            margin-left: 150px;
+        }
+        /* Hidden container for translator injection */
+        #hidden_translate_container {
+            display: none;
+        }
+    </style>
+
+    <!-- 1) Minimal Google Translate Setup (Hidden) -->
+    <script>
+      // Google calls this automatically when translate script loads
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            // All languages you requested, comma-separated
+            includedLanguages: 'en,ur,pa,ps,sd,fa,ar,hi,mr,gu,bn,ta,te,kn,ml,si,th,id,zh-CN,fr',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          },
+          'hidden_translate_container'
+        );
+      }
+
+      // Reapply the user's saved language from localStorage
+      function reapplySavedLanguage() {
+        const savedLang = localStorage.getItem('googleTranslateLang');
+        if (savedLang) {
+          const combo = document.querySelector('.goog-te-combo');
+          if (combo) {
+            combo.value = savedLang;
+            combo.dispatchEvent(new Event('change'));
+          }
+        }
+      }
+
+      // On DOM load, wait briefly, then reapply the saved language
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(reapplySavedLanguage, 500);
+      });
+    </script>
+
+    <!-- 2) Load Google Translate script (no visible dropdown) -->
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- 3) Hidden translator container -->
+    <div id="hidden_translate_container"></div>
+
+    <div class="faq-container">
+        <h1>Frequently Asked Questions</h1>
+
+        <div class="faq-category">
+            <h3 style="color: #4caf50;">1. Account Management</h3>
+            <div class="faq-item">
+                <p><strong>Q1:</strong> How do I create a new account?</p>
+                <p><strong>A:</strong> Click on the "Register" link on the login page, fill in the required details including your username, email, and password, and submit the form. You'll receive a verification code via email to complete your registration.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q2:</strong> I didn't receive a verification email. What should I do?</p>
+                <p><strong>A:</strong> Please check your spam or junk folder. If you still can't find the email, ensure that you entered the correct email address during signup. If the issue persists, contact our support team for assistance.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q3:</strong> How can I reset my password?</p>
+                <p><strong>A:</strong> Click on the "Forgot Password?" link on the login page, enter your registered email address, and follow the instructions sent to your email to reset your password.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q4:</strong> How do I update my profile information?</p>
+                <p><strong>A:</strong> Navigate to the "Profile" section from the navbar, where you can update your personal information such as name, email, phone number, and city.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q5:</strong> Can I delete my account?</p>
+                <p><strong>A:</strong> If you wish to delete your account, please contact our support team with your request. We’ll process it promptly while ensuring the security of your data.</p>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h3 style="color: #4caf50;">2. Using the Dashboard</h3>
+            <div class="faq-item">
+                <p><strong>Q6:</strong> How do I access the Dashboard?</p>
+                <p><strong>A:</strong> Once logged in, click on the "Dashboard" link in the navbar to access the dashboard where you can view and filter commodity price predictions.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q7:</strong> What crops and regions are available for price predictions?</p>
+                <p><strong>A:</strong> Currently, our dashboard supports Sugar and Maize crops across the Punjab, Sindh, and KPK regions. Future updates may include more crops and regions.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q8:</strong> How do I filter data on the Dashboard?</p>
+                <p><strong>A:</strong> Use the dropdown menus labeled "Crop" and "Region" to select your desired crop and region. Click the "Show Graph" button to update the chart with your selections.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q9:</strong> Why is there no data available for my selected region/crop?</p>
+                <p><strong>A:</strong> Data availability depends on historical records and prediction models for each crop and region. If no data is displayed, it might not be available for your selected combination. Please try a different crop or region.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q10:</strong> How often is the price data updated?</p>
+                <p><strong>A:</strong> Our historical data is updated annually, and predicted prices are refreshed quarterly based on market trends and analysis.</p>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h3 style="color: #4caf50;">3. Features and Functionalities</h3>
+            <div class="faq-item">
+                <p><strong>Q11:</strong> What are "Market Insights"?</p>
+                <p><strong>A:</strong> Market Insights provide the latest updates on crop prices and market trends, helping you make informed decisions based on current data.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q12:</strong> How do I set up price alerts?</p>
+                <p><strong>A:</strong> Navigate to the "Alerts" section from the navbar, where you can subscribe to receive real-time notifications for price changes of your selected crops and regions.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q13:</strong> What is the "Guided Tour" feature?</p>
+                <p><strong>A:</strong> The Guided Tour offers a walkthrough of all the features available on our platform, helping you navigate and utilize the application effectively.</p>
+            </div>
+            <div class="faq-item">
+                <p><strong>Q14:</strong> Can I export the data from the Dashboard?</p>
+                <p><strong>A:</strong> Currently, data export functionality is under development. Stay tuned for upcoming updates that will allow you to download the data in various formats.</p>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h3 style="color: #4caf50;">4. Technical Support</h3>
+            <div class="faq-item">
+                <p><strong>Q15:</strong> Which browsers are supported by PricePulse?</p>
+                <p><strong>A:</strong> PricePulse is optimized for the latest versions of modern browsers such as Chrome, Firefox, Safari, and Edge. For the best experience, ensure your browser is up to date.</p>
+            </div>
+            <!-- More FAQ items for Technical Support, etc. -->
+        </div>
+    </div>
+</body>
+</html>

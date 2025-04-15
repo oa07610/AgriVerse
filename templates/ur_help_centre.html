@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ہیلپ سینٹر</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Open Sans', sans-serif;
+        }
+        .faq-container {
+            max-width: 1500px; /* Increased width */
+            margin: 50px auto;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            text-align: left; /* Center-aligns all text inside the container */
+        }
+        .faq-container h1 {
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            color: #4caf50;
+            text-align: center;
+        }
+        .faq-item {
+            margin-bottom: 25px;
+        }
+        .faq-item h5 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .faq-item p {
+            font-size: 1.35em;
+            margin-left: 150px; /* Reset margin-left */
+        }
+    </style>
+</head>
+<body>
+    {% include 'ur_navbar.html' %}
+
+    <div class="faq-container">
+        <h1>اکثر پوچھے جانے والے سوالات
+        </h1>
+        <div class="faq-category">
+            <h3 style="color: #4caf50;">1. اکاؤنٹ مینجمنٹ</h3>
+
+            <div class="faq-item">
+                <p><strong>Q1:</strong> میں نیا اکاؤنٹ کیسے بنا سکتا ہوں؟</p>
+                <p><strong>A:</strong> لاگ ان پیج پر "Register" پر کلک کریں، مطلوبہ تفصیلات جیسے یوزر نیم، ای میل اور پاس ورڈ درج کریں، اور فارم سبمٹ کریں۔ آپ کو رجسٹریشن مکمل کرنے کے لیے ایک تصدیقی کوڈ ای میل کے ذریعے موصول ہوگا۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q2:</strong> مجھے تصدیقی ای میل نہیں ملی۔ مجھے کیا کرنا چاہیے؟</p>
+                <p><strong>A:</strong> براہ کرم اپنے اسپام یا جنک فولڈر کو چیک کریں۔ اگر ای میل وہاں بھی نہیں ملی تو یقینی بنائیں کہ آپ نے سائن اپ کے دوران درست ای میل ایڈریس درج کیا تھا۔ اگر مسئلہ برقرار رہے تو ہماری سپورٹ ٹیم سے مدد کے لیے رابطہ کریں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q3:</strong> میں اپنا پاس ورڈ کیسے ری سیٹ کر سکتا ہوں؟</p>
+                <p><strong>A:</strong> لاگ ان پیج پر "Forgot Password?" لنک پر کلک کریں، اپنا رجسٹرڈ ای میل ایڈریس درج کریں اور ای میل میں دی گئی ہدایات پر عمل کرکے اپنا پاس ورڈ ری سیٹ کریں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q4:</strong> میں اپنی پروفائل کی معلومات کیسے اپڈیٹ کروں؟</p>
+                <p><strong>A:</strong> نیویگیشن بار میں "Profile" سیکشن پر جائیں، جہاں آپ اپنی ذاتی معلومات جیسے نام، ای میل، فون نمبر اور شہر کو اپڈیٹ کر سکتے ہیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q5:</strong> کیا میں اپنا اکاؤنٹ ڈیلیٹ کر سکتا ہوں؟</p>
+                <p><strong>A:</strong> اگر آپ اپنا اکاؤنٹ ڈیلیٹ کرنا چاہتے ہیں تو براہ کرم ہماری سپورٹ ٹیم سے رابطہ کریں۔ ہم آپ کی درخواست کو محفوظ طریقے سے پورا کریں گے۔</p>
+            </div>
+            
+            <h3 style="color: #4caf50;">2. ڈیش بورڈ کا استعمال</h3>
+            
+            <div class="faq-item">
+                <p><strong>Q6:</strong> میں ڈیش بورڈ تک کیسے رسائی حاصل کر سکتا ہوں؟</p>
+                <p><strong>A:</strong> لاگ ان کرنے کے بعد، نیویگیشن بار میں "Dashboard" لنک پر کلک کریں، جہاں آپ کموڈیٹی پرائس پریڈکشنز دیکھ سکتے ہیں اور فلٹر کر سکتے ہیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q7:</strong> قیمتوں کی پیش گوئی کے لیے کون سی فصلیں اور علاقے دستیاب ہیں؟</p>
+                <p><strong>A:</strong> فی الحال، ہمارا ڈیش بورڈ گنے اور مکئی کی فصلوں کو پنجاب، سندھ، اور کے پی کے علاقوں میں سپورٹ کرتا ہے۔ مزید فصلیں اور علاقے آئندہ اپڈیٹس میں شامل کیے جائیں گے۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q8:</strong> میں ڈیش بورڈ پر ڈیٹا کو کیسے فلٹر کروں؟</p>
+                <p><strong>A:</strong> "Crop" اور "Region" کے لیبل والے ڈراپ ڈاؤن مینیو کا استعمال کریں، اپنی پسندیدہ فصل اور علاقہ منتخب کریں، اور "Show Graph" بٹن پر کلک کریں تاکہ آپ کے انتخاب کے ساتھ چارٹ اپڈیٹ ہو جائے۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q9:</strong> میرے منتخب کردہ علاقے/فصل کے لیے ڈیٹا کیوں دستیاب نہیں ہے؟</p>
+                <p><strong>A:</strong> ڈیٹا کی دستیابی ہر فصل اور علاقے کے تاریخی ریکارڈز اور پیش گوئی کے ماڈلز پر منحصر ہے۔ اگر کوئی ڈیٹا ظاہر نہیں ہوتا تو ہو سکتا ہے کہ آپ کے منتخب کردہ امتزاج کے لیے ڈیٹا دستیاب نہ ہو۔ براہ کرم مختلف فصل یا علاقے کو آزمائیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q10:</strong> قیمتوں کا ڈیٹا کتنی بار اپڈیٹ کیا جاتا ہے؟</p>
+                <p><strong>A:</strong> ہمارا تاریخی ڈیٹا سالانہ اپڈیٹ ہوتا ہے، جبکہ پیش گوئی کی گئی قیمتیں سہ ماہی بنیاد پر اپڈیٹ کی جاتی ہیں۔</p>
+            </div>
+            
+            <h3 style="color: #4caf50;">3. خصوصیات اور فعالیت</h3>
+            
+            <div class="faq-item">
+                <p><strong>Q11:</strong> "Market Insights" کیا ہیں؟</p>
+                <p><strong>A:</strong> مارکیٹ انسائٹس فصلوں کی قیمتوں اور مارکیٹ کے رجحانات کے بارے میں تازہ ترین اپڈیٹس فراہم کرتی ہیں، تاکہ آپ موجودہ ڈیٹا کی بنیاد پر بہتر فیصلے کر سکیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q12:</strong> میں پرائس الرٹس کیسے سیٹ کروں؟</p>
+                <p><strong>A:</strong> نیویگیشن بار میں "Alerts" سیکشن پر جائیں، جہاں آپ اپنی منتخب کردہ فصلوں اور علاقوں کے لیے قیمتوں میں تبدیلیوں کے ریئل ٹائم نوٹیفکیشنز حاصل کرنے کے لیے سبسکرائب کر سکتے ہیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q13:</strong> "Guided Tour" فیچر کیا ہے؟</p>
+                <p><strong>A:</strong> گائیڈڈ ٹور ہمارے پلیٹ فارم پر دستیاب تمام خصوصیات کی وضاحت فراہم کرتا ہے، تاکہ آپ ایپلیکیشن کو مؤثر طریقے سے استعمال کر سکیں۔</p>
+            </div>
+            
+            <div class="faq-item">
+                <p><strong>Q14:</strong> کیا میں ڈیش بورڈ سے ڈیٹا ایکسپورٹ کر سکتا ہوں؟</p>
+                <p><strong>A:</strong> فی الحال، ڈیٹا ایکسپورٹ کرنے کی فعالیت زیر ترقی ہے۔ آنے والی اپڈیٹس میں آپ کو مختلف فارمیٹس میں ڈیٹا ڈاؤن لوڈ کرنے کی سہولت فراہم کی جائے گی۔</p>
+            </div>
+            
+            <h3 style="color: #4caf50;">4. تکنیکی مدد</h3>
+            
+            <div class="faq-item">
+                <p><strong>Q15:</strong> PricePulse کون سے براؤزرز کو سپورٹ کرتا ہے؟</p>
+                <p><strong>A:</strong> PricePulse کو جدید براؤزرز کے لیے بہتر بنایا گیا ہے...</p>
+            </div>
+            <!-- Add more questions for Technical Support -->
+        </div>
+
+        <!-- Add remaining categories (Security, Billing, etc.) similarly -->
+    </div>
+</body>
+</html>
