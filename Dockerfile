@@ -1,30 +1,25 @@
-# Use an official Python runtime as a base image
 FROM python:3.11-slim
 
-
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+# 1) install netcat and dos2unix first
+RUN apt-get update \
+ && apt-get install -y netcat-openbsd dos2unix \
+ && rm -rf /var/lib/apt/lists/*
 
-# Install any needed packages specified in requirements.txt
+# 2) install Python deps
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of your application's code into the container
+# 3) copy your entire app (including wait-for-db.sh)
 COPY . .
-# copy the wait script
-COPY wait-for-db.sh /wait-for-db.sh
-RUN chmod +x /wait-for-db.sh
 
+# 4) normalize line endings and make it executable
+RUN dos2unix wait-for-db.sh \
+ && chmod +x wait-for-db.sh
 
-# Expose the port that your Flask app runs on (commonly 5000)
 EXPOSE 5000
-
-# Define environment variable for Flask
 ENV FLASK_APP=app.py
 
-# Run the command to start your app
-#CMD ["flask", "run", "--host=0.0.0.0"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
-
+# 5) finally run through the wait script
+CMD ["./wait-for-db.sh","db","3306","gunicorn","--bind","0.0.0.0:5000","app:app"]
