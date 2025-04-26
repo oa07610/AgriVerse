@@ -1128,8 +1128,8 @@ EMAIL_VERIFICATION_API_KEY = '72f935f4798841c19d6d8fec794816c1'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'agriverseofficial@gmail.com'
-app.config['MAIL_PASSWORD'] = 'adaj ools figk iduh'
+app.config['MAIL_USERNAME'] = 'sidraaamir122019@gmail.com'
+app.config['MAIL_PASSWORD'] = 'azma juwr nkof ejtw'
 mail = Mail(app)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
@@ -1515,8 +1515,6 @@ def external():
         cotton_df = pd.read_csv('external_factor_data/cotton_production.csv')
         sugar_df = pd.read_csv('external_factor_data/sugar_production.csv')
         maize_df = pd.read_csv('external_factor_data/maize_production.csv')
-        export_df = pd.read_csv('external_factor_data/export_trends_fake_data.csv')
-        rainfall_df = pd.read_csv('external_factor_data/rainfall_crop_prices_2010_2025.csv')
 
         # Get list of years
         years = wheat_df['YEAR'].unique().tolist()
@@ -1552,22 +1550,9 @@ def external():
             float(maize_df[maize_df['YEAR'] == latest_year]['KPK'].iloc[0]),
             float(maize_df[maize_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
         ]
-
-        # Process export trends data
-        export_dates = (export_df['Year'].astype(str) + '-' + 
-                       export_df['Month'].astype(str).str.zfill(2)).tolist()
-        export_index = export_df['Export_Index'].tolist()
-        export_prices = export_df['Price'].tolist()
-
-        # Process rainfall and crop price data
-        rainfall_years = rainfall_df['Year'].tolist()
-        rainfall_data = rainfall_df['Rainfall (mm)'].tolist()
-        crop_prices = rainfall_df['Crop Price (USD/ton)'].tolist()
-
     except Exception as e:
-        flash(f'Error loading data: {str(e)}', 'danger')
+        flash(f'Error loading crop production data: {str(e)}', 'danger')
         return redirect(url_for('index'))
-
     # Previous data for other charts
     petrol_df = pd.read_csv('external_factor_data/Petrol Prices.csv')
     petrol_dates = petrol_df['date'].tolist()
@@ -1587,12 +1572,6 @@ def external():
         petrol_prices=json.dumps(petrol_prices),
         inflation_dates=json.dumps(inflation_dates),
         inflation_rates=json.dumps(inflation_rates),
-        export_dates=json.dumps(export_dates),
-        export_index=json.dumps(export_index),
-        export_prices=json.dumps(export_prices),
-        rainfall_years=json.dumps(rainfall_years),
-        rainfall_data=json.dumps(rainfall_data),
-        crop_prices=json.dumps(crop_prices),
         last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 

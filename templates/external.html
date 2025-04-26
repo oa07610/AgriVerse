@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-    
     <style>
         :root {
             --primary-color: #2ecc71;
@@ -403,16 +402,7 @@
                 <canvas id="sugarChart"></canvas>
             </div>
         </div>
-        <!-- rainfal with price -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h3 class="card-title">Rainfall and Crop Price Correlation</h3>
-                <i class="ri-drop-line card-icon"></i>
-            </div>
-            <div class="chart-container">
-                <canvas id="rainfallChart"></canvas>
-            </div>
-        </div>
+    
         <!-- Maize Production Card -->
         <div class="dashboard-card">
             <div class="card-header">
@@ -423,17 +413,7 @@
                 <canvas id="maizeChart"></canvas>
             </div>
         </div>
-        <!-- export vs price  Card -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h3 class="card-title">Export Trends vs. Price</h3>
-                <i class="ri-line-chart-line card-icon"></i>
-            </div>
-            <div class="chart-container">
-                <canvas id="exportTrendsChart"></canvas>
-            </div>
-        </div>
-        
+    
         <!-- Petrol Price Card -->
         <div class="dashboard-card">
             <div class="card-header">
@@ -699,132 +679,6 @@
                 yearSelector.value = yearSelector.options[yearSelector.options.length - 1].value;
             }
         });
-        // Add this to your DOMContentLoaded event listener
-const exportTrendsCtx = document.getElementById('exportTrendsChart').getContext('2d');
-new Chart(exportTrendsCtx, {
-    type: 'line',
-    data: {
-        labels: {{ export_dates | safe }},
-        datasets: [{
-            label: 'Export Index',
-            data: {{ export_index | safe }},
-            borderColor: '#2ecc71',
-            yAxisID: 'y',
-            tension: 0.4,
-            fill: false
-        }, {
-            label: 'Price ($)',
-            data: {{ export_prices | safe }},
-            borderColor: '#e74c3c',
-            yAxisID: 'y1',
-            tension: 0.4,
-            fill: false
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
-        plugins: {
-            legend: {
-                position: 'bottom'
-            },
-            title: {
-                display: true,
-                text: 'Export Trends vs. Price'
-            }
-        },
-        scales: {
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'Export Index'
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Price ($)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            }
-        }
-    }
-});
-// Initialize rainfall and crop price chart
-const rainfallCtx = document.getElementById('rainfallChart').getContext('2d');
-new Chart(rainfallCtx, {
-    type: 'line',
-    data: {
-        labels: {{ rainfall_years | safe }},
-        datasets: [{
-            label: 'Rainfall (mm)',
-            data: {{ rainfall_data | safe }},
-            borderColor: '#3498db',
-            yAxisID: 'y',
-            tension: 0.4,
-            fill: false
-        }, {
-            label: 'Crop Price (USD/ton)',
-            data: {{ crop_prices | safe }},
-            borderColor: '#2ecc71',
-            yAxisID: 'y1',
-            tension: 0.4,
-            fill: false
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
-        plugins: {
-            title: {
-                display: true,
-                text: 'Rainfall and Crop Price Trends'
-            }
-        },
-        scales: {
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'Rainfall (mm)'
-                },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Crop Price (USD/ton)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            }
-        }
-    }
-});
     </script>
     </body>
 </html>
