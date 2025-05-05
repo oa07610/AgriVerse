@@ -1,9 +1,6 @@
-import json
-import pandas as pd
-import numpy as np
-import math
-from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from flask_cors import CORS
@@ -11,14 +8,19 @@ import google.generativeai as genai
 from googletrans import Translator
 from deep_translator import GoogleTranslator
 import requests
+import random
 import base64
 import os
-from werkzeug.utils import secure_filename
 from functools import wraps
 import folium
 from folium import Map, CircleMarker, Marker, Tooltip, Icon
 from folium.plugins import HeatMap
-import secrets  # Use secrets for secure OTP generation
+import pandas as pd
+import numpy as np
+import branca
+import json
+import math
+import secrets
 from supabase_client import supabase
 from dotenv import load_dotenv
 
@@ -41,25 +43,41 @@ WHISPER_HEADERS = {"Authorization": "Bearer hf_XZpOhPOjRxEZgZWTOBAUfxSAFdilHjuTx
 WEATHER_API_KEY = "c0363e5d2fde46e098f134021252001"
 WEATHER_BASE_URL = "http://api.weatherapi.com/v1/forecast.json"
 
+# Initialize the translator
 translator = Translator()
 
-# Email verification configuration
+# File to store user data
+SUGAR_ACTUAL_FILE = 'data/final_sugar_province_actual.csv'
+SUGAR_PRED_FILE = 'data/final_sugar_province_pred_formatted.csv'
+MAIZE_ACTUAL_FILE = 'data/maize_actual.csv'
+MAIZE_PRED_FILE = 'data/maize_pred.csv'
+COTTON_ACTUAL_FILE = 'data/cotton_actual.csv'
+COTTON_PRED_FILE = 'data/cotton_pred.csv'
+WHEAT_ACTUAL_FILE = 'data/wheat_actual.csv'
+WHEAT_PRED_FILE = 'data/wheat_pred.csv'
+
+#email verification
 EMAIL_VERIFICATION_API_KEY = 'b814452326e648f483566594dc079eab'
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'sidraaamir122019@gmail.com'
-app.config['MAIL_PASSWORD'] = 'azma juwr nkof ejtw'
+app.config['MAIL_USERNAME'] = 'agriverseofficial@gmail.com'  # Replace with your email
+app.config['MAIL_PASSWORD'] = 'adaj ools figk iduh'  # Replace with your email password
 mail = Mail(app)
+
+# Update the UPLOAD_FOLDER to be an absolute path
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov'}
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+# Create uploads folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
 
 def admin_required(f):
     @wraps(f)
@@ -144,67 +162,6 @@ def newsletter():
     posts = resp.data if resp.data else []
     return render_template('newsletter.html', posts=posts)
 
-@app.route('/api/wheat_predictions', methods=['GET'])
-def get_wheat_predictions():
-    try:
-        predictions = pd.read_csv('data/final_wheat_predictions.csv')
-        # Convert the date column to a string format (if needed)
-        predictions['date'] = pd.to_datetime(predictions['date']).dt.strftime('%Y-%m-%d')
-        result = predictions.to_dict(orient='records')
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# # ----------------------------------------------------------------------------
-# # NEW: CSV Upload Route with Backup & Merge Logic
-# # ----------------------------------------------------------------------------
-
-# import subprocess
-# from datetime import datetime
-# import os
-
-# def backup_table(table_name):
-#     """
-#     Backs up the given table from fyp_db using mysqldump.
-#     Returns the backup file name on success, or None on failure.
-#     """
-#     backup_file = f'backup_{table_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.sql'
-#     mysqldump_path = r"C:\Program Files\MySQL\MySQL Server 9.2\bin\mysqldump.exe"  # Adjust path if needed
-
-#     command = [
-#         mysqldump_path,
-#         '-u', 'root',
-#         '--password=Kaavish2025',
-#         'fyp_db',
-#         table_name
-#     ]
-#     try:
-#         result = subprocess.run(command, capture_output=True, text=True)
-#         # Write stdout to the backup file
-#         with open(backup_file, 'w', encoding='utf-8') as f:
-#             f.write(result.stdout)
-
-#         if result.returncode == 0:
-#             # Even if there's a warning, we treat returncode==0 as success
-#             print(f"[DEBUG] Backup succeeded for {table_name}: {backup_file}")
-#             return backup_file
-#         else:
-#             # Print to console for debugging, no user-facing message
-#             print(f"[DEBUG] Backup failed for {table_name}, return code: {result.returncode}")
-#             return None
-#     except Exception as e:
-#         # Print to console for debugging
-#         print(f"[DEBUG] Backup failed for {table_name}: {e}")
-#         return None
-
-# Map commodity from the dropdown to the DB table name
-TABLE_MAP = {
-    'wheat':  'wheatmaster',
-    'maize':  'maizemaster',
-    'cotton': 'cottonmaster',
-    'sugar':  'sugarmaster'
-}
-
 @app.route('/admin/upload_csv', methods=['GET', 'POST'])
 @admin_required
 def upload_csv():
@@ -264,10 +221,139 @@ def upload_csv():
     return render_template('admin/upload_csv.html', table_map=TABLE_MAP)
 
 
+@app.route('/external')
+def external():
+    try:
+        # Read crop production data
+        wheat_df = pd.read_csv('external_factor_data/wheat_production.csv')
+        cotton_df = pd.read_csv('external_factor_data/cotton_production.csv')
+        sugar_df = pd.read_csv('external_factor_data/sugar_production.csv')
+        maize_df = pd.read_csv('external_factor_data/maize_production.csv')
+        export_df = pd.read_csv('external_factor_data/export_trends_fake_data.csv')
+        rainfall_df = pd.read_csv('external_factor_data/rainfall_crop_prices_2010_2025.csv')
+        
+        # Read USD exchange rate data
+        usd_df = pd.read_csv('external_factor_data/USD_PKR Historical Data.csv')
+        
+        # Process USD data
+        usd_dates = usd_df['Date'].tolist()
+        usd_prices = usd_df['Price'].tolist()
+        usd_open = usd_df['Open'].tolist()
+        usd_high = usd_df['High'].tolist()
+        usd_low = usd_df['Low'].tolist()
+        usd_change_pct = usd_df['Change %'].str.rstrip('%').astype('float').tolist()
 
-# ----------------------------------------------------------------------------
-# END CSV Upload Logic
-# ----------------------------------------------------------------------------
+        # Get list of years
+        years = wheat_df['YEAR'].unique().tolist()
+        
+        # Get initial data (latest year)
+        latest_year = years[-1]  # Get the last year from the list
+        
+        # Convert data to lists for initial charts
+        initial_wheat_data = [
+            float(wheat_df[wheat_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+            float(wheat_df[wheat_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+            float(wheat_df[wheat_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+            float(wheat_df[wheat_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+        ]
+        
+        initial_cotton_data = [
+            float(cotton_df[cotton_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+            float(cotton_df[cotton_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+            float(cotton_df[cotton_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+            float(cotton_df[cotton_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+        ]
+        
+        initial_sugar_data = [
+            float(sugar_df[sugar_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+            float(sugar_df[sugar_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+            float(sugar_df[sugar_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+            float(sugar_df[sugar_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+        ]
+        
+        initial_maize_data = [
+            float(maize_df[maize_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+            float(maize_df[maize_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+            float(maize_df[maize_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+            float(maize_df[maize_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+        ]
+
+        # Process export trends data
+        export_dates = (export_df['Year'].astype(str) + '-' + 
+                       export_df['Month'].astype(str).str.zfill(2)).tolist()
+        export_index = export_df['Export_Index'].tolist()
+        export_prices = export_df['Price'].tolist()
+
+        # Process rainfall and crop price data
+        rainfall_years = rainfall_df['Year'].tolist()
+        rainfall_data = rainfall_df['Rainfall (mm)'].tolist()
+        crop_prices = rainfall_df['Crop Price (USD/ton)'].tolist()
+
+    except Exception as e:
+        flash(f'Error loading data: {str(e)}', 'danger')
+        return redirect(url_for('index'))
+
+    # Previous data for other charts
+    petrol_df = pd.read_csv('external_factor_data/Petrol Prices.csv')
+    petrol_dates = petrol_df['date'].tolist()
+    petrol_prices = petrol_df['price'].tolist()
+
+    inflation_df = pd.read_csv('external_factor_data/pakistan-inflation-rate-cpi.csv')
+    inflation_dates = inflation_df['date'].tolist()
+    inflation_rates = inflation_df['per_Capita'].tolist()
+
+    return render_template('external.html',
+        years=years,
+        initial_wheat_data=initial_wheat_data,
+        initial_cotton_data=initial_cotton_data,
+        initial_sugar_data=initial_sugar_data,
+        initial_maize_data=initial_maize_data,
+        petrol_dates=json.dumps(petrol_dates),
+        petrol_prices=json.dumps(petrol_prices),
+        inflation_dates=json.dumps(inflation_dates),
+        inflation_rates=json.dumps(inflation_rates),
+        export_dates=json.dumps(export_dates),
+        export_index=json.dumps(export_index),
+        export_prices=json.dumps(export_prices),
+        rainfall_years=json.dumps(rainfall_years),
+        rainfall_data=json.dumps(rainfall_data),
+        crop_prices=json.dumps(crop_prices),
+        usd_dates=json.dumps(usd_dates),
+        usd_prices=json.dumps(usd_prices),
+        usd_open=json.dumps(usd_open),
+        usd_high=json.dumps(usd_high),
+        usd_low=json.dumps(usd_low),
+        usd_change_pct=json.dumps(usd_change_pct),
+        last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+@app.route('/get_crop_production_data/<int:year>')
+def get_crop_production_data(year):
+    # Read crop data
+    wheat_df = pd.read_csv('external_factor_data/wheat_production.csv')
+    cotton_df = pd.read_csv('external_factor_data/cotton_production.csv')
+    sugar_df = pd.read_csv('external_factor_data/sugar_production.csv')
+    maize_df = pd.read_csv('external_factor_data/maize_production.csv')
+
+    # Get data for the selected year
+    return jsonify({
+        'wheat': get_province_data(wheat_df, year),
+        'cotton': get_province_data(cotton_df, year),
+        'sugar': get_province_data(sugar_df, year),
+        'maize': get_province_data(maize_df, year)
+    })
+
+def get_province_data(df, year):
+    # Get row for the specified year
+    year_data = df[df['YEAR'] == year].iloc[0]
+    
+    # Return province-wise data
+    return {
+        'Punjab': year_data['Punjab'],
+        'Sindh': year_data['Sindh'],
+        'KPK': year_data['KPK'],
+        'Balochistan': year_data['Balochistan']
+    }
+
 
 # Temporary storage for verification codes
 verification_data = {}
@@ -280,7 +366,6 @@ def signup_user(data):
         "email":    data['email'],
         "password": hashed,
         "fullname": data['fullname'],
-        "city":     data['city'],
         "phone":    data['phone']
     }
     return supabase.from_("user").insert(payload).execute()
@@ -289,7 +374,6 @@ def signup_user(data):
 def signup():
     fullname = request.form['fullname']
     username = request.form['username']
-    city     = request.form['city']
     email    = request.form['email']
     phone    = request.form['phone']
     password = request.form['password']
@@ -339,7 +423,7 @@ def signup():
     verification_data[email] = {
         "code":   code,
         "expiry": datetime.now() + timedelta(minutes=5),
-        "data":   {"fullname":fullname,"username":username,"city":city,"email":email,"phone":phone,"password":password}
+        "data":   {"fullname":fullname,"username":username,"email":email,"phone":phone,"password":password}
     }
     session['signup_data'] = verification_data[email]['data']
 
@@ -419,96 +503,71 @@ def login():
     flash('Invalid username or password!', 'danger')
     return redirect(url_for('index'))
 
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')  # Redirect to the English home page
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('index'))
+    
+    response = make_response(redirect(url_for('index')))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
+# Add this to handle direct access to pages that require login
+@app.before_request
+def before_request():
+    # List of routes that require authentication
+    protected_routes = ['dashboard', 'admin_dashboard']
+    
+    if request.endpoint in protected_routes and 'user_id' not in session:
+        flash('Please log in to access this page.', 'info')
+        return redirect(url_for('login'))
+# @app.route('/en/home')
+# def en_home():
+#     return render_template('home.html')  # English home page
+
+
+# @app.route('/dashboard')
+# def home():
+#     return render_template('dashboard.html')
+
+# Add dashboard route
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
 
+# Add FAQs route
 @app.route('/faqs')
 def faqs():
     return render_template('faqs.html')
-
-@app.route('/external')
-def external():
-    try:
-        # Read crop production data
-        wheat_df = pd.read_csv('external_factor_data/wheat_production.csv')
-        cotton_df = pd.read_csv('external_factor_data/cotton_production.csv')
-        sugar_df = pd.read_csv('external_factor_data/sugar_production.csv')
-        maize_df = pd.read_csv('external_factor_data/maize_production.csv')
-
-        # Get list of years
-        years = wheat_df['YEAR'].unique().tolist()
-        
-        # Get initial data (latest year)
-        latest_year = years[-1]  # Get the last year from the list
-        
-        # Convert data to lists for initial charts
-        initial_wheat_data = [
-            float(wheat_df[wheat_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
-            float(wheat_df[wheat_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
-            float(wheat_df[wheat_df['YEAR'] == latest_year]['KPK'].iloc[0]),
-            float(wheat_df[wheat_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
-        ]
-        
-        initial_cotton_data = [
-            float(cotton_df[cotton_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
-            float(cotton_df[cotton_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
-            float(cotton_df[cotton_df['YEAR'] == latest_year]['KPK'].iloc[0]),
-            float(cotton_df[cotton_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
-        ]
-        
-        initial_sugar_data = [
-            float(sugar_df[sugar_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
-            float(sugar_df[sugar_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
-            float(sugar_df[sugar_df['YEAR'] == latest_year]['KPK'].iloc[0]),
-            float(sugar_df[sugar_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
-        ]
-        
-        initial_maize_data = [
-            float(maize_df[maize_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
-            float(maize_df[maize_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
-            float(maize_df[maize_df['YEAR'] == latest_year]['KPK'].iloc[0]),
-            float(maize_df[maize_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
-        ]
-    except Exception as e:
-        flash(f'Error loading crop production data: {str(e)}', 'danger')
-        return redirect(url_for('index'))
-    # Previous data for other charts
-    petrol_df = pd.read_csv('external_factor_data/Petrol Prices.csv')
-    petrol_dates = petrol_df['date'].tolist()
-    petrol_prices = petrol_df['price'].tolist()
-
-    inflation_df = pd.read_csv('external_factor_data/pakistan-inflation-rate-cpi.csv')
-    inflation_dates = inflation_df['date'].tolist()
-    inflation_rates = inflation_df['per_Capita'].tolist()
-
-    return render_template('external.html',
-        years=years,
-        initial_wheat_data=initial_wheat_data,
-        initial_cotton_data=initial_cotton_data,
-        initial_sugar_data=initial_sugar_data,
-        initial_maize_data=initial_maize_data,
-        petrol_dates=json.dumps(petrol_dates),
-        petrol_prices=json.dumps(petrol_prices),
-        inflation_dates=json.dumps(inflation_dates),
-        inflation_rates=json.dumps(inflation_rates),
-        last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
-
+# Add CHATBOT route
 @app.route('/chatbot')
 def chatbot():
     return render_template('chatbot.html')
+
+# @app.route('/ur/verify')
+# def ur_verify():
+#     return render_template('ur_verify.html')  # Urdu verification page
+
+# @app.route('/ur/dashboard')
+# def ur_dashboard():
+#     return render_template('ur_dashboard.html')  # Urdu dashboard
+
+# @app.route('/ur/help-centre')
+# def ur_help_center():
+#     return render_template('ur_help_centre.html')  # Urdu Help Centre template
+
+# @app.route('/ur/faqs')
+# def ur_faqs():
+#     return render_template('ur_faqs.html')  # Urdu FAQs page
+
+#chatbot code#
 
 def transcribe_audio(audio_data):
     try:
@@ -580,15 +639,20 @@ def chat():
         input_type = data.get('type', 'text')
         
         if input_type == 'audio':
+            # Handle audio input
             audio_data = base64.b64decode(data['audio'].split(',')[1])
             user_message = transcribe_audio(audio_data)
+            # Translate transcribed text to Urdu for display
             translated_output = GoogleTranslator(source="auto", target="ur").translate(user_message)
         else:
+            # Handle text input
             user_message = data.get('message', '')
             
+        # Translate to English for processing
         translated_question = translate_roman_urdu(user_message)
         conversation_history = f"User: {translated_question}\n"
         
+        # Check for weather-related queries
         if "weather" in translated_question.lower() or "rain" in translated_question.lower():
             location = extract_location_with_gemini(translated_question)
             if not location:
@@ -596,6 +660,7 @@ def chat():
             weather_response = get_weather_data(location)
             conversation_history += f"Weather Info: {weather_response}\n"
         
+        # Generate Gemini AI response
         response = generate_gemini_answer(conversation_history)
         
         return jsonify({
@@ -606,14 +671,7 @@ def chat():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-SUGAR_ACTUAL_FILE = 'data/final_sugar_province_actual.csv'
-SUGAR_PRED_FILE = 'data/final_sugar_province_pred_formatted.csv'
-MAIZE_ACTUAL_FILE = 'data/maize_actual.csv'
-MAIZE_PRED_FILE = 'data/maize_pred.csv'
-COTTON_ACTUAL_FILE = 'data/cotton_actual.csv'
-COTTON_PRED_FILE = 'data/cotton_pred.csv'
-
+# Update the get_sugar_data function to handle Wheat
 @app.route('/get_sugar_data', methods=['GET'])
 def get_sugar_data():
     crop = request.args.get('crop')
@@ -629,16 +687,22 @@ def get_sugar_data():
     elif crop == 'Cotton':
         actual_file = COTTON_ACTUAL_FILE
         pred_file = COTTON_PRED_FILE
+    elif crop == 'Wheat':
+        actual_file = WHEAT_ACTUAL_FILE
+        pred_file = WHEAT_PRED_FILE
     else:
         return jsonify({'error': 'Invalid crop selected.'}), 400
 
+    # Read the actual and predicted prices data
     actual_data = pd.read_csv(actual_file)
     pred_data = pd.read_csv(pred_file)
 
-    if by_product:
+    # Filter by by_product if specified and if it's Cotton
+    if by_product and crop == 'Cotton':
         actual_data = actual_data[actual_data['by_product'] == int(by_product)]
         pred_data = pred_data[pred_data['by_product'] == int(by_product)]
 
+    # Filter and prepare data for each region
     result = []
     colors_actual = ['rgba(76, 175, 80, 1)', 'rgba(255, 87, 34, 1)', 'rgba(33, 150, 243, 1)']
     colors_predicted = ['rgba(76, 175, 80, 0.5)', 'rgba(255, 87, 34, 0.5)', 'rgba(33, 150, 243, 0.5)']
@@ -650,6 +714,7 @@ def get_sugar_data():
         if region_actual.empty or region_pred.empty:
             continue
 
+        # Standardize dates to ISO 8601 format
         region_actual['date'] = pd.to_datetime(region_actual['date'], errors='coerce').dt.strftime('%Y-%m-%d')
         region_pred['date'] = pd.to_datetime(region_pred['date'], errors='coerce').dt.strftime('%Y-%m-%d')
 
@@ -671,6 +736,7 @@ def get_sugar_data():
 
     return jsonify(result)
 
+# Update the get_crop_data function to handle Wheat
 @app.route('/get_crop_data', methods=['GET'])
 def get_crop_data():
     province = request.args.get('province')
@@ -683,7 +749,8 @@ def get_crop_data():
         'Sugar': (SUGAR_ACTUAL_FILE, SUGAR_PRED_FILE),
         'Maize': (MAIZE_ACTUAL_FILE, MAIZE_PRED_FILE),
         'Cotton-1': (COTTON_ACTUAL_FILE, COTTON_PRED_FILE),
-        'Cotton-2': (COTTON_ACTUAL_FILE, COTTON_PRED_FILE)
+        'Cotton-2': (COTTON_ACTUAL_FILE, COTTON_PRED_FILE),
+        'Wheat': (WHEAT_ACTUAL_FILE, WHEAT_PRED_FILE)
     }
 
     result = []
@@ -698,6 +765,7 @@ def get_crop_data():
         actual_data = pd.read_csv(actual_file)
         pred_data = pd.read_csv(pred_file)
 
+        # Handle Cotton by-products
         if crop.startswith('Cotton-'):
             by_product = int(crop.split('-')[1])
             actual_data = actual_data[actual_data['by_product'] == by_product]
@@ -709,6 +777,7 @@ def get_crop_data():
         if region_actual.empty or region_pred.empty:
             continue
 
+        # Standardize dates
         region_actual['date'] = pd.to_datetime(region_actual['date'], errors='coerce').dt.strftime('%Y-%m-%d')
         region_pred['date'] = pd.to_datetime(region_pred['date'], errors='coerce').dt.strftime('%Y-%m-%d')
 
@@ -729,43 +798,175 @@ def get_crop_data():
         })
 
     return jsonify(result)
+# @app.route('/get_heatmap_data')
+# def get_heatmap_data():
+#     try:
+#         # Read and process the data
+#         df = pd.read_csv("new_data/CottonMaster.csv")
+#         df['province'] = df['province'].str.strip()
+#         df['price'] = (df['minimum'] + df['maximum']) / 2
+        
+#         df = df[['date', 'station_id', 'by_product_id', 'province', 'Lat', 'Long', 'price']]
+#         df['date'] = pd.to_datetime(df['date'])
+#         df = df.drop_duplicates()
+#         df['Lat'] = pd.to_numeric(df['Lat'], errors='coerce')
+#         df['Long'] = pd.to_numeric(df['Long'], errors='coerce')
+        
+#         # Filter DataFrame
+#         df = df[(df['date'] == '2020-12-31') & (df['by_product_id'] == 7)]
+        
+#         # Prepare heatmap data
+#         heat_data = df[['Lat', 'Long', 'price']].values.tolist()
+        
+#         # Return data needed for rendering
+#         return jsonify({
+#             'heat_data': heat_data,
+#             'min_price': float(df['price'].min()),
+#             'max_price': float(df['price'].max())
+#         })
+        
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
 
 from folium import Map
 from folium.plugins import HeatMap
+import pandas as pd
+import branca
+import json
+from flask import jsonify
 
+# Mapping crop names to CSV file paths
 CROP_CSV_MAPPING = {
     "cotton": "new_data/CottonMaster.csv",
     "sugar": "new_data/SugarMaster.csv",
     "wheat": "new_data/WheatMaster.csv",
     "maize": "new_data/MaizeMaster.csv"
 }
-
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Check if the email exists in the database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash('No account found with that email address.', 'danger')
+            return redirect(url_for('forgot_password'))
+        
+        # Generate a verification code
+        reset_code = str(random.randint(100000, 999999))
+        
+        # Store the reset code and its expiry time in the verification_data dictionary
+        verification_data[email] = {
+            'code': reset_code,
+            'expiry': datetime.now() + timedelta(minutes=15),
+            'purpose': 'password_reset'
+        }
+        
+        # Send the verification code via email
+        msg = Message('Password Reset Code', sender=app.config['MAIL_USERNAME'], recipients=[email])
+        msg.body = f'Your password reset code is {reset_code}. It will expire in 15 minutes.'
+        mail.send(msg)
+        
+        flash('A password reset code has been sent to your email.', 'info')
+        return redirect(url_for('reset_password', email=email))
+    
+    return render_template('forgot_password.html')
+@app.route('/reset-password/<email>', methods=['GET', 'POST'])
+def reset_password(email):
+    if request.method == 'POST':
+        try:
+            reset_code = request.form['reset_code']
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+            
+            print(f"Debug - Processing reset for email: {email}")
+            
+            # Validate the reset code
+            if email not in verification_data:
+                flash('Invalid or expired reset link. Please try again.', 'danger')
+                return redirect(url_for('forgot_password'))
+            
+            data = verification_data[email]
+            if datetime.now() > data.get('expiry'):
+                # Remove expired verification data
+                del verification_data[email]
+                flash('The reset code has expired. Please request a new one.', 'danger')
+                return redirect(url_for('forgot_password'))
+            
+            if reset_code != data.get('code') or data.get('purpose') != 'password_reset':
+                flash('Invalid reset code. Please try again.', 'danger')
+                return redirect(url_for('reset_password', email=email))
+            
+            # Validate the new password
+            import re
+            password_criteria = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-])[A-Za-z\d!@#$%^&*()_+={}[\]:;"<>,.?/\\|`~-]{8,}$')
+            if not password_criteria.match(new_password):
+                flash('Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.', 'danger')
+                return redirect(url_for('reset_password', email=email))
+            
+            # Check if passwords match
+            if new_password != confirm_password:
+                flash('Passwords do not match!', 'danger')
+                return redirect(url_for('reset_password', email=email))
+            
+            # Update the user's password
+            user = User.query.filter_by(email=email).first()
+            print(f"Debug - User found: {user is not None}")
+            
+            if user:
+                try:
+                    hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
+                    user.password = hashed_password
+                    db.session.commit()
+                    print("Debug - Password updated successfully")
+                    
+                    # Remove the verification data
+                    del verification_data[email]
+                    
+                    flash('Your password has been reset successfully! You can now log in with your new password.', 'success')
+                    return redirect(url_for('index'))
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Debug - Database error: {str(e)}")
+                    flash('An error occurred while updating your password. Please try again.', 'danger')
+                    return redirect(url_for('reset_password', email=email))
+            else:
+                flash('User not found. Please check your email address.', 'danger')
+                return redirect(url_for('forgot_password'))
+        except Exception as e:
+            print(f"Debug - Unexpected error: {str(e)}")
+            flash('An unexpected error occurred. Please try again.', 'danger')
+            return redirect(url_for('reset_password', email=email))
+    
+    return render_template('reset_password.html', email=email)
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
     try:
+        # Get parameters from the request
         crop = request.args.get('crop', '').strip().lower()
         print(f"Received crop: {crop}")
         by_product = request.args.get('by_product', '')
 
+        # Ensure a valid crop is selected
         if crop not in CROP_CSV_MAPPING:
             return jsonify({'error': 'Invalid or missing crop selection'}), 400
 
+        # Load CSV based on selected crop
         csv_path = CROP_CSV_MAPPING[crop]
         print(f"Loading CSV: {csv_path}")
         df = pd.read_csv(csv_path)
 
+        # Debug: Check if data loaded correctly
         print(f"DataFrame Shape before filtering: {df.shape}")
         print("Column Names:", df.columns)
         print(df.head())
 
-        df.columns = df.columns.str.lower()
+        # Data Cleaning & Processing
+        df.columns = df.columns.str.lower()  # Standardize column names
         df['province'] = df['province'].str.strip()
-        # Ensure 'minimum' and 'maximum' columns are numeric
-        df['minimum'] = pd.to_numeric(df['minimum'], errors='coerce')
-        df['maximum'] = pd.to_numeric(df['maximum'], errors='coerce')
-
         df['price'] = (df['minimum'] + df['maximum']) / 2
-
         if crop == "wheat":
             df = df[['date', 'station_id', 'province', 'lat', 'long', 'maximum','price']]
             df['date'] = pd.to_datetime(df['date'])
@@ -779,49 +980,64 @@ def get_heatmap_data():
             df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
             df['long'] = pd.to_numeric(df['long'], errors='coerce')
 
+        # Debug: Check unique dates before filtering
         print("Available Dates before filtering:", df['date'].unique())
-
+        # Apply by_product filter if provided
         if by_product:
             try:
                 by_product_id = int(by_product)
-                print("by product value", by_product_id)
+                print("by product value",by_product_id)
                 print(f"Filtering for by_product_id: {by_product_id}")
                 print("Available by_product_id values:", df['by_product_id'].unique())
                 df = df[df['by_product_id'] == by_product_id]
                 print(f"Rows after filtering by by_product_id: {len(df)}")
             except ValueError:
                 return jsonify({'error': 'Invalid by-product ID'}), 400
-
         if df.empty:
             return jsonify({'error': 'No data available for the selected filters'}), 404
-
+        # Apply date filter
         latest_date = df['date'].max()
+    # Convert to datetime object
         latest_date = pd.to_datetime(latest_date)
+
+    # Format it to 'YYYY-MM-DD' (remove the time part)
         target_date = latest_date.strftime('%Y-%m-%d')
         df = df[df['date'] == target_date]
         print(f"Rows after filtering by date {target_date}: {len(df)}")
+        # Ensure data is available
+        
 
+                # Create Folium Map
+                        
+                
+        # Ensure lat/lon are numeric
         df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
         df['long'] = pd.to_numeric(df['long'], errors='coerce')
 
+        # Create the map with an initial view
         m = Map(
-            location=[30.0, 70.0],
-            zoom_start=4,
+            location=[30.0, 70.0],  # Default center (Pakistan)
+            zoom_start=4,  # Initial zoom
             max_bounds=True,
             tiles="CartoDB positron",
             width="100%",
-            height=350
+            height="350px"
         )
 
-        heat_data = list(zip(df['lat'], df['long'], df['price']))
+        # Add the heatmap
+        heat_data = list(zip(df['lat'], df['long'], df['price']))  # Assuming price influences intensity
         HeatMap(heat_data).add_to(m)
 
+        # **Fit map to the data points**
         if not df.empty:
-            sw = [df['lat'].min(), df['long'].min()]
-            ne = [df['lat'].max(), df['long'].max()]
-            m.fit_bounds([sw, ne])
+            sw = [df['lat'].min(), df['long'].min()]  # Southwest corner
+            ne = [df['lat'].max(), df['long'].max()]  # Northeast corner
+            m.fit_bounds([sw, ne])  # Auto-zoom based on bounds
 
+        # Prepare heatmap data
         heat_data = df[['lat', 'long', 'price']].dropna().values.tolist()
+
+        # Add HeatMap layer
         HeatMap(
             heat_data,
             name="Heatmap",
@@ -834,24 +1050,25 @@ def get_heatmap_data():
         for _, row in df.iterrows():
             folium.CircleMarker(
                 location=[row['lat'], row['long']],
-                radius=5,
-                color="transparent",
+                radius=5,  # Smallest possible size
+                color="transparent",  # No border color
                 fill=True,
-                fill_color="transparent",
-                fill_opacity=0,
+                fill_color="transparent",  # Fully transparent fill
+                fill_opacity=0,  # 0 opacity to ensure invisibility
                 tooltip=f"Price: {row['price']:.2f} PKR"
             ).add_to(m)
-
-        import branca
+        # Add color scale legend
         colormap = branca.colormap.LinearColormap(
             colors=['blue', 'green', 'yellow', 'red'],
             vmin=df['price'].min(),
             vmax=df['price'].max(),
             caption="Price Intensity"
         ).to_step(n=5)
+
         colormap.add_to(m)
         m.fit_bounds([[23, 60], [38, 77]])
 
+        # Convert map to HTML
         map_html = m._repr_html_()
 
         return jsonify({
@@ -862,6 +1079,5 @@ def get_heatmap_data():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)

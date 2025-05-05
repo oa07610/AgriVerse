@@ -13,23 +13,24 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: url('/static/bg.jpg') no-repeat center center/cover;
-            height: 100vh;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .navbar {
             padding: 15px 30px;
             background: transparent;
-            position: absolute;
             width: 100%;
-            top: 0;
-            left: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         .navbar a {
@@ -43,8 +44,8 @@
         .navbar .btn-login {
             background: #4caf50;
             color: white;
-            border-radius: 50px;
-            padding: 10px 20px;
+            border-radius: 40px;
+            padding: 10px 15px;
             transition: 0.3s;
         }
 
@@ -56,112 +57,174 @@
         }
 
         .hero-section {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 50px;
-            width: 100%;
+            padding: 100px 50px;
             max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 40px;
         }
 
         .hero-text {
             color: white;
-            max-width: 500px;
+            flex: 1;
+            max-width: 600px;
         }
 
         .hero-text h1 {
             font-size: 1.8em;
             font-weight: bold;
             line-height: 1.2;
+            margin-top: 15px;
         }
 
         .form-container {
             background: white;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 10px;
             box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
-            max-width: 250px;
-            width: 90%;
-            margin: auto;
+            width: 220px; /* Reduced width from 350px to 300px */
+            margin: 0;
+            flex-shrink: 0; /* Prevent expanding */
+            max-width: 220px; /* Ensure max width is also controlled */
         }
 
         .form-container h3 {
             text-align: center;
-            font-size: 0.8em;
-            margin-bottom: 8px;
+            font-size: 0.7em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 5px;
         }
 
         .form-container input {
-            border-radius: 2px;
-            padding: 4px;
             width: 100%;
-            margin-bottom: 3px;
-            font-size: 0.5em;
-            border: 0.5px solid #ddd;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.7em;
+            transition: border-color 0.3s;
+            margin-bottom: 5px;
         }
 
-        .form-container .btn-green {
-            background: #4caf50;
-            padding: 4px;
-            border: none;
-            color: white;
-            border-radius: 3px;
-            font-size: 0.5em;
+        .form-container input:focus {
+            border-color: #4caf50;
+            outline: none;
+        }
+
+        .password-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
-            margin-top: 5px;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.6em;
         }
 
-        .form-container .btn-green:hover {
+        .btn-green {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 0.6em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 8px;
+        
+        }
+
+        .btn-green:hover {
             background: #388e3c;
         }
 
-        .form-container .terms {
+        .terms {
+            font-size: 0.5em;
+            text-align: left;
+            margin: 5px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .terms input[type="checkbox"] {
+            width: auto;
+            margin-right: 4px;
+            margin-top: 2px;
+        }
+
+        .auth-toggle-text {
             font-size: 0.5em;
             text-align: center;
+            margin-top: 5px;
+        }
+
+        .auth-toggle-text a {
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* Added for forgot password link */
+        .forgot-password {
+            font-size: 0.5em;
+            text-align: right;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+
+        .forgot-password a {
+            color: #4caf50;
+            text-decoration: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.45em;
+            margin-top: 5px;
+            display: none;
         }
 
         .flash-messages {
-            font-size: 0.5em;
-            font-weight: normal;
-            color: #d9534f;
-            background: #f8d7da;
-            padding: 8px 12px;
+            font-size: 0.45em;
+            padding: 6px;
             border-radius: 5px;
+            margin-bottom: 5px;
             text-align: center;
-            margin-bottom: 10px;
-            border: 1px solid #d9534f;
-        }
-        
-        .auth-toggle-text {
-            font-size: 0.5em;
-            font-weight: 500;
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        .auth-toggle-text a {
-            font-size: 0.9em;
-            font-weight: bold;
-            text-decoration: none;
-            color: #007bff;
-        }
-        
-        .auth-toggle-text a:hover {
-            text-decoration: underline;
         }
 
-        /* Google Translate widget styling */
+        /* Positioning the Google Translate widget */
         .google-translate-container {
             margin-left: 15px;
         }
 
+        /* Adjust the size of the Google Translate dropdown */
         .goog-te-gadget {
             color: white !important;
             background-color: transparent !important;
             border: none !important;
-            font-size: 0.8em;
+            font-size: 0.7em;
         }
 
         .goog-te-gadget .goog-te-combo {
@@ -172,6 +235,7 @@
             padding: 5px;
         }
 
+        /* Hide the "Powered by Google" label */
         .goog-logo-link {
             display: none !important;
         }
@@ -193,21 +257,23 @@
             }
 
             .form-container {
-                max-width: 300px;
+                width: 250px;
+                max-width: 250px;
+                padding: 10px;
             }
         }
     </style>
-    <!-- Google Translate Script with limited languages (English, Urdu, Punjabi, Sindhi, Pashto) -->
+    <!-- Google Translate Script -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
-                includedLanguages: 'en,ur,pa,sd,ps',
                 layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
                 autoDisplay: false
             }, 'google_translate_element');
         }
     </script>
+    <!-- Ensure HTTPS is used -->
     <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
@@ -218,6 +284,7 @@
             <a href="/">Agri<span style="color:#388e3c;">Verse</span>.</a>
         </div>
         <div style="display: flex; align-items: center;">
+        
             <!-- Google Translate Element -->
             <div class="google-translate-container" id="google_translate_element"></div>
             <a href="#" class="btn btn-login" id="toggle-form">Sign Up</a>
@@ -235,7 +302,7 @@
         <div class="form-container">
             <h3 id="form-title">Login</h3>
 
-            <!-- Flash Messages -->
+            <!-- Flash Messages from Flask -->
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 <div class="flash-messages">
@@ -246,17 +313,48 @@
               {% endif %}
             {% endwith %}
 
-            <form id="auth-form" action="/login" method="post">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
+            <form id="auth-form" action="/login" method="post" onsubmit="return validateForm(event)">
+                <div class="input-group">
+                    <input type="text" name="username" id="username" placeholder="Username" required>
+                    <div class="error-message" id="username-error"></div>
+                </div>
                 
-                <!-- Signup-only Fields (Initially Hidden) -->
                 <div id="signup-fields" style="display: none;">
-                    <input type="text" name="fullname" placeholder="Full Name">
-                    <input type="text" name="city" placeholder="City">
-                    <input type="email" name="email" placeholder="Email">
-                    <input type="tel" name="phone" placeholder="Phone">
-                    <input type="password" name="confirm-password" placeholder="Confirm Password">
+                    <div class="input-group">
+                        <input type="text" name="fullname" id="fullname" placeholder="Full Name">
+                        <div class="error-message" id="fullname-error"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" name="email" id="email" placeholder="Email">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="tel" name="phone" id="phone" placeholder="Phone">
+                        <div class="error-message" id="phone-error"></div>
+                    </div>
+                </div>
+                
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                
+                <!-- Forgot Password Link - Only visible in login mode -->
+                <div class="forgot-password" id="forgot-password-link">
+                    <a href="/forgot-password">Forgot Password?</a>
+                </div>
+                
+                <div class="password-container" id="confirm-password-container" style="display: none;">
+                    <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="error-message" id="confirm-password-error"></div>
                 </div>
 
                 <button type="submit" class="btn-green" id="form-submit-btn">Login</button>
@@ -269,15 +367,150 @@
                 </p>
 
                 <p class="auth-toggle-text">
-                    Have an account? <a href="#" class="toggle-link" id="toggle-auth">Login</a>
+                    Don't have an account? <a href="#" class="toggle-link" id="toggle-auth">Sign Up</a>
                 </p>
-                
             </form>
         </div>
     </div>
 
     <script>
-        // Toggle between Login and Signup forms
+        async function validateEmail(email) {
+            try {
+                const response = await fetch(`/validate_email?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                return data.is_valid;
+            } catch (error) {
+                console.error('Error validating email:', error);
+                return false;
+            }
+        }
+        
+        function showError(fieldId, message) {
+            const errorDiv = document.getElementById(`${fieldId}-error`);
+            const input = document.getElementById(fieldId);
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            input.classList.add('input-error');
+        }
+
+        function clearErrors() {
+            const errorDivs = document.querySelectorAll('.error-message');
+            const inputs = document.querySelectorAll('input');
+            errorDivs.forEach(div => div.style.display = 'none');
+            inputs.forEach(input => input.classList.remove('input-error'));
+        }
+        
+        async function validateForm(event) {
+            const formTitle = document.getElementById('form-title').innerText;
+            
+            if (formTitle === 'Sign Up') {
+                event.preventDefault();
+                let isValid = true;
+                clearErrors();
+
+                // Username validation
+                const username = document.getElementById('username');
+                if (!/^[a-zA-Z0-9._]{3,15}$/.test(username.value)) {
+                    showError('username', 'Username must be 3-15 characters long, can include letters, numbers, underscores, and periods.');
+                    isValid = false;
+                }
+
+                // Email validation
+                const email = document.getElementById('email');
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                    showError('email', 'Please enter a valid email address.');
+                    isValid = false;
+                }
+                
+                // Password validation
+                const password = document.getElementById('password');
+                if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-])[A-Za-z\d!@#$%^&*()_+={}[\]:;"<>,.?/\\|`~-]{8,}$/.test(password.value)) {
+                    showError('password', 'Password must be at least 8 characters long, include uppercase, lowercase, number, and special character.');
+                    isValid = false;
+                }
+                
+                // Confirm password validation
+                const confirmPassword = document.getElementById('confirm-password');
+                if (confirmPassword.value !== password.value) {
+                    showError('confirm-password', 'Passwords do not match.');
+                    isValid = false;
+                }
+
+                // Phone validation
+                const phone = document.getElementById('phone');
+                if (!/^\d{11}$/.test(phone.value)) {
+                    showError('phone', 'Please enter a valid 11-digit phone number.');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const form = document.getElementById('auth-form');
+                    form.action = '/signup';
+                    form.submit();
+                }
+                return false;
+            }
+            return true;
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleAuthForm() {
+            const formTitle = document.getElementById("form-title");
+            const formAction = document.getElementById("auth-form");
+            const signupFields = document.getElementById("signup-fields");
+            const confirmPasswordContainer = document.getElementById("confirm-password-container");
+            const submitBtn = document.getElementById("form-submit-btn");
+            const toggleLink = document.getElementById("toggle-auth");
+            const termsText = document.getElementById("terms-text");
+            const termsCheckbox = document.getElementById("terms-checkbox");
+            const authToggleText = document.querySelector(".auth-toggle-text");
+            const forgotPasswordLink = document.getElementById("forgot-password-link");
+
+            clearErrors();
+
+            if (formTitle.innerText === "Login") {
+                formTitle.innerText = "Sign Up";
+                formAction.action = "/signup";
+                signupFields.style.display = "block";
+                confirmPasswordContainer.style.display = "block";
+                submitBtn.innerText = "Sign Up";
+                authToggleText.innerHTML = 'Have an account? <a href="#" class="toggle-link" id="toggle-auth">Login</a>';
+                termsText.style.display = "inline";
+                termsCheckbox.style.display = "inline";
+                forgotPasswordLink.style.display = "none"; // Hide forgot password in signup mode
+            } else {
+                formTitle.innerText = "Login";
+                formAction.action = "/login";
+                signupFields.style.display = "none";
+                confirmPasswordContainer.style.display = "none";
+                submitBtn.innerText = "Login";
+                authToggleText.innerHTML = 'Don\'t have an account? <a href="#" class="toggle-link" id="toggle-auth">Sign Up</a>';
+                termsText.style.display = "none";
+                termsCheckbox.style.display = "none";
+                forgotPasswordLink.style.display = "block"; // Show forgot password in login mode
+            }
+            
+            // Reattach event listener to the new toggle link
+            document.getElementById("toggle-auth").addEventListener("click", function(e) {
+                e.preventDefault();
+                toggleAuthForm();
+            });
+        }
+
+        // Initial event listeners
         document.getElementById("toggle-auth").addEventListener("click", function(e) {
             e.preventDefault();
             toggleAuthForm();
@@ -288,34 +521,14 @@
             toggleAuthForm();
         });
 
-        function toggleAuthForm() {
-            let formTitle = document.getElementById("form-title");
-            let formAction = document.getElementById("auth-form");
-            let signupFields = document.getElementById("signup-fields");
-            let submitBtn = document.getElementById("form-submit-btn");
-            let toggleLink = document.getElementById("toggle-auth");
-            let termsText = document.getElementById("terms-text");
-            let termsCheckbox = document.getElementById("terms-checkbox");
-
-            if (formTitle.innerText === "Login") {
-                formTitle.innerText = "Sign Up";
-                formAction.action = "/signup";
-                signupFields.style.display = "block";
-                submitBtn.innerText = "Sign Up";
-                toggleLink.innerText = "Login";
-                termsText.style.display = "block";
-                termsCheckbox.style.display = "inline-block";
-            } else {
-                formTitle.innerText = "Login";
-                formAction.action = "/login";
-                signupFields.style.display = "none";
-                submitBtn.innerText = "Login";
-                toggleLink.innerText = "Sign Up";
-                termsText.style.display = "none";
-                termsCheckbox.style.display = "none";
+        // Clear flash messages when navigating back
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.querySelectorAll('.flash-messages').forEach(function(element) {
+                    element.style.display = 'none';
+                });
             }
-        }
+        });
     </script>
-
 </body>
 </html>
