@@ -162,6 +162,13 @@ def newsletter():
     posts = resp.data if resp.data else []
     return render_template('newsletter.html', posts=posts)
 
+TABLE_MAP = {
+    'wheat':  'wheatmaster',
+    'maize':  'maizemaster',
+    'cotton': 'cottonmaster',
+    'sugar':  'sugarmaster'
+}
+
 @app.route('/admin/upload_csv', methods=['GET', 'POST'])
 @admin_required
 def upload_csv():
@@ -847,100 +854,96 @@ CROP_CSV_MAPPING = {
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
-        
-        # Check if the email exists in the database
-        user = User.query.filter_by(email=email).first()
+        # Fetch user from Supabase
+        resp = supabase.from_('user') \
+                       .select('id') \
+                       .eq('email', email) \
+                       .single() \
+                       .execute()
+        user = resp.data if resp.data else None
         if not user:
             flash('No account found with that email address.', 'danger')
             return redirect(url_for('forgot_password'))
-        
-        # Generate a verification code
-        reset_code = str(random.randint(100000, 999999))
-        
-        # Store the reset code and its expiry time in the verification_data dictionary
+
+        # Generate reset code
+        reset_code = ''.join(secrets.choice('0123456789') for _ in range(6))
         verification_data[email] = {
-            'code': reset_code,
-            'expiry': datetime.now() + timedelta(minutes=15),
+            'code':    reset_code,
+            'expiry':  datetime.now() + timedelta(minutes=15),
             'purpose': 'password_reset'
         }
-        
-        # Send the verification code via email
-        msg = Message('Password Reset Code', sender=app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f'Your password reset code is {reset_code}. It will expire in 15 minutes.'
+
+        # Send reset email
+        msg = Message('Password Reset Code',
+                      sender=app.config['MAIL_USERNAME'],
+                      recipients=[email])
+        msg.body = (
+            f'Your password reset code is {reset_code}. '
+            'It will expire in 15 minutes.'
+        )
         mail.send(msg)
-        
+
         flash('A password reset code has been sent to your email.', 'info')
         return redirect(url_for('reset_password', email=email))
-    
+
     return render_template('forgot_password.html')
+
+
 @app.route('/reset-password/<email>', methods=['GET', 'POST'])
 def reset_password(email):
     if request.method == 'POST':
-        try:
-            reset_code = request.form['reset_code']
-            new_password = request.form['new_password']
-            confirm_password = request.form['confirm_password']
-            
-            print(f"Debug - Processing reset for email: {email}")
-            
-            # Validate the reset code
-            if email not in verification_data:
-                flash('Invalid or expired reset link. Please try again.', 'danger')
-                return redirect(url_for('forgot_password'))
-            
-            data = verification_data[email]
-            if datetime.now() > data.get('expiry'):
-                # Remove expired verification data
-                del verification_data[email]
-                flash('The reset code has expired. Please request a new one.', 'danger')
-                return redirect(url_for('forgot_password'))
-            
-            if reset_code != data.get('code') or data.get('purpose') != 'password_reset':
-                flash('Invalid reset code. Please try again.', 'danger')
-                return redirect(url_for('reset_password', email=email))
-            
-            # Validate the new password
-            import re
-            password_criteria = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-])[A-Za-z\d!@#$%^&*()_+={}[\]:;"<>,.?/\\|`~-]{8,}$')
-            if not password_criteria.match(new_password):
-                flash('Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.', 'danger')
-                return redirect(url_for('reset_password', email=email))
-            
-            # Check if passwords match
-            if new_password != confirm_password:
-                flash('Passwords do not match!', 'danger')
-                return redirect(url_for('reset_password', email=email))
-            
-            # Update the user's password
-            user = User.query.filter_by(email=email).first()
-            print(f"Debug - User found: {user is not None}")
-            
-            if user:
-                try:
-                    hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
-                    user.password = hashed_password
-                    db.session.commit()
-                    print("Debug - Password updated successfully")
-                    
-                    # Remove the verification data
-                    del verification_data[email]
-                    
-                    flash('Your password has been reset successfully! You can now log in with your new password.', 'success')
-                    return redirect(url_for('index'))
-                except Exception as e:
-                    db.session.rollback()
-                    print(f"Debug - Database error: {str(e)}")
-                    flash('An error occurred while updating your password. Please try again.', 'danger')
-                    return redirect(url_for('reset_password', email=email))
-            else:
-                flash('User not found. Please check your email address.', 'danger')
-                return redirect(url_for('forgot_password'))
-        except Exception as e:
-            print(f"Debug - Unexpected error: {str(e)}")
-            flash('An unexpected error occurred. Please try again.', 'danger')
+        reset_code      = request.form['reset_code']
+        new_password    = request.form['new_password']
+        confirm_password= request.form['confirm_password']
+
+        # Validate code entry
+        record = verification_data.get(email)
+        if (not record
+            or datetime.now() > record['expiry']
+            or record.get('purpose') != 'password_reset'):
+            verification_data.pop(email, None)
+            flash('Invalid or expired reset link. Please try again.', 'danger')
+            return redirect(url_for('forgot_password'))
+
+        if reset_code != record['code']:
+            flash('Invalid reset code. Please try again.', 'danger')
             return redirect(url_for('reset_password', email=email))
-    
+
+        # Password rules
+        import re
+        pwd_regex = (
+            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+            r'(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-]).{8,}$'
+        )
+        if not re.match(pwd_regex, new_password):
+            flash('Password must be at least 8 characters long, '
+                  'include uppercase, lowercase, number, and special char.',
+                  'danger')
+            return redirect(url_for('reset_password', email=email))
+
+        if new_password != confirm_password:
+            flash('Passwords do not match!', 'danger')
+            return redirect(url_for('reset_password', email=email))
+
+        # Update the user's password
+        hashed = generate_password_hash(
+            new_password, method='pbkdf2:sha256'
+        )
+        resp = supabase.from_('user') \
+                       .update({'password': hashed}) \
+                       .eq('email', email) \
+                       .execute()
+        if not getattr(resp, 'data', None):
+            flash('Failed to reset password. Please try again.', 'danger')
+            return redirect(url_for('reset_password', email=email))
+
+        # Cleanup
+        verification_data.pop(email, None)
+        flash('Your password has been reset! You can now log in.', 'success')
+        return redirect(url_for('index'))
+
     return render_template('reset_password.html', email=email)
+
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
     try:
