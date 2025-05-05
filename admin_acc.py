@@ -1,13 +1,15 @@
-from app import app, db
-from models import User
 from werkzeug.security import generate_password_hash
+from supabase_client import supabase
 
-with app.app_context():
-    admin = User(
-        username='admin',
-        email='admin1@agriverse.com',
-        password=generate_password_hash('What_isthe_password1'),
-        is_admin=True
-    )
-    db.session.add(admin)
-    db.session.commit()
+def signup_user():
+    # Hash and insert via Supabase
+    hashed = generate_password_hash('admin', method='pbkdf2:sha256')
+    payload = {
+        "username": 'admin',
+        "email":    "admin@agriverse.com",
+        "password": hashed,
+        "fullname": 'admin'
+    }
+    return supabase.from_("user").insert(payload).execute()
+
+signup_user()

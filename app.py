@@ -1,7 +1,8 @@
 import json
 import pandas as pd
+import numpy as np
+import math
 from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify, send_from_directory
-from models import db, User, NewsletterPost
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
@@ -17,52 +18,17 @@ from functools import wraps
 import folium
 from folium import Map, CircleMarker, Marker, Tooltip, Icon
 from folium.plugins import HeatMap
-import branca
 import secrets  # Use secrets for secure OTP generation
-import subprocess  # For running mysqldump
+from supabase_client import supabase
+from dotenv import load_dotenv
 
-# (Optional) CSRF Protection using Flask-WTF
-# from flask_wtf.csrf import CSRFProtect
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-
-# app.config['SESSION_COOKIE_SECURE'] = True
-# app.config['SESSION_COOKIE_HTTPONLY'] = True
-# app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# csrf = CSRFProtect(app)
-
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', '55fc588fcd7ef7e247fa6db7953d398f16520b1aeacabd74')
-
-# ─────────────────────────────────────────────────────────────────────────────
-#   1. Change the DB URI from SQLite to MySQL using environment variables
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Construct the connection string dynamically using environment variables
-db_user = os.environ.get('DB_USER', 'root')
-db_password = os.environ.get('DB_PASSWORD', 'Kaavish2025')  # default fallback
-db_host = os.environ.get('DB_HOST', 'localhost')
-db_name = os.environ.get('DB_NAME', 'fyp_db')
-
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{db_name}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db.init_app(app)
-with app.app_context():
-    db.create_all()
-
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.secret_key = app.config['SECRET_KEY']
-
-
-
-
-
-
-
-
-
-
-
 
 # Configure the Gemini API key
 genai.configure(api_key="AIzaSyATFqI_3BL0y78m9R3XTwKcHLMiCURbMcI")
@@ -78,7 +44,7 @@ WEATHER_BASE_URL = "http://api.weatherapi.com/v1/forecast.json"
 translator = Translator()
 
 # Email verification configuration
-EMAIL_VERIFICATION_API_KEY = '72f935f4798841c19d6d8fec794816c1'
+EMAIL_VERIFICATION_API_KEY = 'b814452326e648f483566594dc079eab'
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -97,29 +63,34 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def admin_required(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated(*args, **kwargs):
         if 'user_id' not in session:
             flash('Please log in first.', 'danger')
             return redirect(url_for('login'))
-        
-        user = User.query.get(session['user_id'])
-        if not user or not user.is_admin:
+        # fetch user from supabase
+        resp = supabase.from_('user').select('*').eq('id', session['user_id']).single().execute()
+        user = resp.data
+        if not user or not user.get('is_admin'):
             flash('Access denied. Admin privileges required.', 'danger')
             return redirect(url_for('index'))
-        
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated
 
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
-    posts = NewsletterPost.query.order_by(NewsletterPost.created_at.desc()).all()
+    # Fetch newsletter posts ordered by creation timestamp descending
+    resp = (supabase
+            .from_('newsletter_post')
+            .select("*, author:user(username)")
+            .order('created_at', desc=True)
+            .execute())
+    posts = resp.data or []
     return render_template('admin/admin_dashboard.html', posts=posts)
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-print(f"Upload folder path: {UPLOAD_FOLDER}")  # Debug print
 
 @app.route('/admin/create_post', methods=['GET', 'POST'])
 @admin_required
@@ -127,73 +98,50 @@ def create_post():
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
-        
         if not title or not content:
             flash('Title and content are required.', 'danger')
             return redirect(url_for('create_post'))
-        
-        image_url = None
-        video_url = None
-        
-        if 'image' in request.files:
-            file = request.files['image']
+        image_url = video_url = None
+        for field in ('image', 'video'):
+            file = request.files.get(field)
             if file and file.filename and allowed_file(file.filename):
-                try:
-                    filename = secure_filename(file.filename)
-                    unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-                    file.save(file_path)
-                    image_url = f'/static/uploads/{unique_filename}'
-                except Exception as e:
-                    print(f"Error saving image: {str(e)}")
-                    flash(f'Error uploading image: {str(e)}', 'danger')
-                    return redirect(url_for('create_post'))
-        
-        if 'video' in request.files:
-            file = request.files['video']
-            if file and file.filename and allowed_file(file.filename):
-                try:
-                    filename = secure_filename(file.filename)
-                    unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-                    file.save(file_path)
-                    video_url = f'/static/uploads/{unique_filename}'
-                except Exception as e:
-                    print(f"Error saving video: {str(e)}")
-                    flash(f'Error uploading video: {str(e)}', 'danger')
-                    return redirect(url_for('create_post'))
-        
-        try:
-            post = NewsletterPost(
-                title=title,
-                content=content,
-                image_url=image_url,
-                video_url=video_url,
-                author_id=session['user_id']
-            )
-            db.session.add(post)
-            db.session.commit()
-            
-            flash('Post created successfully!', 'success')
-            return redirect(url_for('admin_dashboard'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error creating post: {str(e)}', 'danger')
+                filename = secure_filename(file.filename)
+                unique = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                path = os.path.join(UPLOAD_FOLDER, unique)
+                file.save(path)
+                if field == 'image':
+                    image_url = f'/static/uploads/{unique}'
+                else:
+                    video_url = f'/static/uploads/{unique}'
+        payload = {
+            'title': title,
+            'content': content,
+            'image_url': image_url,
+            'video_url': video_url,
+            'author_id': session['user_id']
+        }
+        resp = supabase.from_('newsletter_post').insert(payload).execute()
+        # Check insertion success via resp.data
+        if not getattr(resp, 'data', None):
+            flash('Error creating post. Please try again.', 'danger')
             return redirect(url_for('create_post'))
-    
+        flash('Post created successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
     return render_template('admin/create_post.html')
+
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    try:
-        return send_from_directory('static', filename)
-    except Exception as e:
-        print(f"Error serving static file: {str(e)}")
-        return "File not found", 404
+    return send_from_directory('static', filename)
 
 @app.route('/newsletter')
 def newsletter():
-    posts = NewsletterPost.query.order_by(NewsletterPost.created_at.desc()).all()
+    resp = (supabase
+            .from_('newsletter_post')
+            .select("*, author:user(username)")
+            .order('created_at', desc=True)
+            .execute())
+    posts = resp.data if resp.data else []
     return render_template('newsletter.html', posts=posts)
 
 @app.route('/api/wheat_predictions', methods=['GET'])
@@ -207,113 +155,115 @@ def get_wheat_predictions():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ----------------------------------------------------------------------------
-# NEW: CSV Upload Route with Backup & Merge Logic
-# ----------------------------------------------------------------------------
+# # ----------------------------------------------------------------------------
+# # NEW: CSV Upload Route with Backup & Merge Logic
+# # ----------------------------------------------------------------------------
 
-import subprocess
-from datetime import datetime
-import os
+# import subprocess
+# from datetime import datetime
+# import os
+
+# def backup_table(table_name):
+#     """
+#     Backs up the given table from fyp_db using mysqldump.
+#     Returns the backup file name on success, or None on failure.
+#     """
+#     backup_file = f'backup_{table_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.sql'
+#     mysqldump_path = r"C:\Program Files\MySQL\MySQL Server 9.2\bin\mysqldump.exe"  # Adjust path if needed
+
+#     command = [
+#         mysqldump_path,
+#         '-u', 'root',
+#         '--password=Kaavish2025',
+#         'fyp_db',
+#         table_name
+#     ]
+#     try:
+#         result = subprocess.run(command, capture_output=True, text=True)
+#         # Write stdout to the backup file
+#         with open(backup_file, 'w', encoding='utf-8') as f:
+#             f.write(result.stdout)
+
+#         if result.returncode == 0:
+#             # Even if there's a warning, we treat returncode==0 as success
+#             print(f"[DEBUG] Backup succeeded for {table_name}: {backup_file}")
+#             return backup_file
+#         else:
+#             # Print to console for debugging, no user-facing message
+#             print(f"[DEBUG] Backup failed for {table_name}, return code: {result.returncode}")
+#             return None
+#     except Exception as e:
+#         # Print to console for debugging
+#         print(f"[DEBUG] Backup failed for {table_name}: {e}")
+#         return None
 
 # Map commodity from the dropdown to the DB table name
 TABLE_MAP = {
-    'wheat':  'WheatMaster',
-    'maize':  'MaizeMaster',
-    'cotton': 'CottonMaster',
-    'sugar':  'SugarMaster'
+    'wheat':  'wheatmaster',
+    'maize':  'maizemaster',
+    'cotton': 'cottonmaster',
+    'sugar':  'sugarmaster'
 }
-
-def backup_table(table_name):
-    """
-    Backs up the given table from fyp_db using mysqldump.
-    Returns the backup file name on success, or None on failure.
-    """
-    backup_file = f'backup_{table_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.sql'
-    mysqldump_path = r"C:\Program Files\MySQL\MySQL Server 9.2\bin\mysqldump.exe"  # Adjust path if needed
-
-    command = [
-        mysqldump_path,
-        '-u', 'root',
-        '--password=Kaavish2025',
-        'fyp_db',
-        table_name
-    ]
-    try:
-        result = subprocess.run(command, capture_output=True, text=True)
-        # Write stdout to the backup file
-        with open(backup_file, 'w', encoding='utf-8') as f:
-            f.write(result.stdout)
-
-        if result.returncode == 0:
-            # Even if there's a warning, we treat returncode==0 as success
-            print(f"[DEBUG] Backup succeeded for {table_name}: {backup_file}")
-            return backup_file
-        else:
-            # Print to console for debugging, no user-facing message
-            print(f"[DEBUG] Backup failed for {table_name}, return code: {result.returncode}")
-            return None
-    except Exception as e:
-        # Print to console for debugging
-        print(f"[DEBUG] Backup failed for {table_name}: {e}")
-        return None
-
 
 @app.route('/admin/upload_csv', methods=['GET', 'POST'])
 @admin_required
 def upload_csv():
     if request.method == 'POST':
         file = request.files.get('csv_file')
-        if not file or file.filename == '' or not file.filename.lower().endswith('.csv'):
-            # No file or invalid extension -> unify as 'merge failed'
-            flash("File merge failed.", "danger")
+        if not file or not file.filename.lower().endswith('.csv'):
+            flash("Please upload a valid CSV file.", "danger")
             return redirect(url_for('admin_dashboard'))
-        
+
         crop_type = request.form.get('crop_type')
         if crop_type not in TABLE_MAP:
-            flash("File merge failed.", "danger")
+            flash("Unknown crop type selected.", "danger")
             return redirect(url_for('admin_dashboard'))
-        
-        # Save CSV temporarily
+        table_name = TABLE_MAP[crop_type]
+
+        # Save temp
         temp_dir = 'temp_uploads'
         os.makedirs(temp_dir, exist_ok=True)
         temp_path = os.path.join(temp_dir, secure_filename(file.filename))
         file.save(temp_path)
 
-        # Backup step
-        table_name = TABLE_MAP[crop_type]
-        backup_file = backup_table(table_name)
-        if not backup_file:
-            print(f"[DEBUG] Backup step failed for {table_name}. Not merging.")
-            os.remove(temp_path)
-            flash("File merge failed.", "danger")
-            return redirect(url_for('admin_dashboard'))
-
-        # Read CSV step
+        # Read CSV
         try:
             df_new = pd.read_csv(temp_path)
         except Exception as e:
-            print(f"[DEBUG] Error reading CSV: {e}")
             os.remove(temp_path)
-            flash("File merge failed.", "danger")
+            flash(f"Error reading CSV: {e}", "danger")
             return redirect(url_for('admin_dashboard'))
 
-        # Merge step
+        # Sanitize every cell: convert numpy types, drop non-finite floats
+        records = []
+        for row in df_new.to_dict(orient='records'):
+            clean_row = {}
+            for k, v in row.items():
+                # Unwrap numpy scalar
+                if isinstance(v, np.generic):
+                    v = v.item()
+                # Convert NaN or infinite floats to None
+                if isinstance(v, float):
+                    if not math.isfinite(v):
+                        v = None
+                clean_row[k] = v
+            records.append(clean_row)
+
         try:
-            with db.engine.begin() as conn:
-                df_new.to_sql(table_name, con=conn, if_exists='append', index=False)
-        except Exception as e:
-            print(f"[DEBUG] Error merging CSV data: {e}")
+            resp = supabase.from_(table_name).insert(records).execute()
+        finally:
             os.remove(temp_path)
-            flash("File merge failed.", "danger")
-            return redirect(url_for('admin_dashboard'))
 
-        # Success
-        os.remove(temp_path)
-        flash("File merged successfully!", "success")
+        if getattr(resp, 'data', None):
+            flash(f"Successfully inserted {len(resp.data)} rows into {table_name}.", "success")
+        else:
+            flash("Failed to insert records. Check data for invalid values.", "danger")
+
         return redirect(url_for('admin_dashboard'))
 
-    # GET request
-    return "CSV Upload Page - Under Construction"
+    return render_template('admin/upload_csv.html', table_map=TABLE_MAP)
+
+
 
 # ----------------------------------------------------------------------------
 # END CSV Upload Logic
@@ -322,128 +272,153 @@ def upload_csv():
 # Temporary storage for verification codes
 verification_data = {}
 
+def signup_user(data):
+    # Hash and insert via Supabase
+    hashed = generate_password_hash(data['password'], method='pbkdf2:sha256')
+    payload = {
+        "username": data['username'],
+        "email":    data['email'],
+        "password": hashed,
+        "fullname": data['fullname'],
+        "city":     data['city'],
+        "phone":    data['phone']
+    }
+    return supabase.from_("user").insert(payload).execute()
+
 @app.route('/signup', methods=['POST'])
 def signup():
     fullname = request.form['fullname']
     username = request.form['username']
-    city = request.form['city']
-    email = request.form['email']
-    phone = request.form['phone']
+    city     = request.form['city']
+    email    = request.form['email']
+    phone    = request.form['phone']
     password = request.form['password']
-    confirm_password = request.form['confirm-password']
-    
+    confirm  = request.form['confirm-password']
+
+    # 1) Email format check (defensive against missing keys)
     api_url = f"https://emailvalidation.abstractapi.com/v1/?api_key={EMAIL_VERIFICATION_API_KEY}&email={email}"
-    response = requests.get(api_url)
-    email_data = response.json()
-    if (not email_data['is_valid_format']['value']) or (email_data['deliverability'] != "DELIVERABLE"):
-        flash('Invalid or unregistered email address. Please use a valid email.', 'danger')
+    resp_json = requests.get(api_url).json()
+    valid_format    = resp_json.get('is_valid_format', {}).get('value', False)
+    deliverability  = resp_json.get('deliverability', '').upper()
+
+    if not valid_format or deliverability != "DELIVERABLE":
+        flash('Invalid or undeliverable email address. Please use a valid email.', 'danger')
         return render_template('index.html', email=email)
-    
+
+    # 2) Username rules
     import re
-    username_criteria = re.compile(r'^[a-zA-Z0-9._]{3,15}$')
-    if not username_criteria.match(username):
-        flash('Username must be 3-15 characters long, can include letters, numbers, underscores, and periods.', 'danger')
+    if not re.match(r'^[a-zA-Z0-9._]{3,15}$', username) or any(x in username for x in ["..","__","._","_."]):
+        flash('Username rules violation.', 'danger')
         return render_template('index.html', username=username)
-    
-    if ".." in username or "__" in username or "._" in username or "_. " in username:
-        flash('Username must not contain consecutive special characters.', 'danger')
-        return render_template('index.html', username=username)
-    
-    password_criteria = re.compile(
-        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-])[A-Za-z\d!@#$%^&*()_+={}[\]:;"<>,.?/\\|`~-]{8,}$'
-    )
-    if not password_criteria.match(password):
-        flash('Password must be at least 8 characters long and include uppercase, lowercase, number, special char.', 'danger')
+
+    # 3) Password strength & match
+    pwd_pattern = (r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+                   r'(?=.*[!@#$%^&*()_+={}\[\]:;"<>,.?/\\|~-])'
+                   r'.{8,}$')
+    if not re.match(pwd_pattern, password):
+        flash('Password must be min 8 chars, mixed case, number & special.', 'danger')
         return render_template('index.html', username=username, email=email)
-        
-    if password != confirm_password:
+
+    if password != confirm:
         flash('Passwords do not match!', 'danger')
         return render_template('index.html', username=username, email=email)
 
-    existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
-    if existing_user:
+    # 4) Check existing user in Supabase
+    #    Using or() to search username OR email
+    check = supabase.from_("user") \
+        .select("id") \
+        .or_(f"username.eq.{username},email.eq.{email}") \
+        .limit(1) \
+        .execute()
+    if check.data:
         flash('Username or email already exists!', 'danger')
         return render_template('index.html', username=username, email=email)
 
-    verification_code = ''.join(secrets.choice("0123456789") for _ in range(6))
+    # 5) Generate & store OTP
+    code = ''.join(secrets.choice("0123456789") for _ in range(6))
     verification_data[email] = {
-        'code': verification_code,
-        'expiry': datetime.now() + timedelta(minutes=5),
-        'username': username,
-        'password': password
+        "code":   code,
+        "expiry": datetime.now() + timedelta(minutes=5),
+        "data":   {"fullname":fullname,"username":username,"city":city,"email":email,"phone":phone,"password":password}
     }
-    session['signup_data'] = {
-        'username': username,
-        'email': email,
-        'password': password,
-        'city': city,
-        'fullname': fullname,
-        'phone': phone
-    }
+    session['signup_data'] = verification_data[email]['data']
 
-    msg = Message('Your Verification Code', sender=app.config['MAIL_USERNAME'], recipients=[email])
-    msg.body = f'Your verification code is {verification_code}. It will expire in 5 minutes.'
+    # 6) Send OTP email
+    msg = Message('Your Verification Code',
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[email])
+    msg.body = f"Your code is {code}. Expires in 5 minutes."
     mail.send(msg)
 
-    flash('A verification code has been sent to your email.', 'info')
+    flash('Verification code sent. Check your email!', 'info')
     return redirect(url_for('verify', email=email))
 
 @app.route('/verify/<email>', methods=['GET', 'POST'])
 def verify(email):
     if request.method == 'POST':
-        entered_code = request.form['verification_code']
+        entered = request.form['verification_code']
+        record  = verification_data.get(email)
 
-        if email in verification_data:
-            data = verification_data[email]
-            if datetime.now() > data['expiry']:
-                flash('Verification code expired. Please sign up again.', 'danger')
-                return redirect(url_for('index'))
-            elif entered_code == data['code']:
-                del verification_data[email]
-
-                signup_data = session.pop('signup_data', None)
-                if not signup_data:
-                    flash('Session expired. Please sign up again.', 'danger')
-                    return redirect(url_for('index'))
-                
-                username = signup_data['username']
-                password = signup_data['password']
-
-                hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-                new_user = User(username=username, email=email, password=hashed_password)
-                db.session.add(new_user)
-                db.session.commit()
-
-                return redirect(url_for('index'))
-            else:
-                flash('Invalid verification code. Please try again.', 'danger')
-                return redirect(url_for('verify', email=email))
-        else:
-            flash('No verification data found. Please sign up again.', 'danger')
+        if not record:
+            flash('No verification found. Please sign up again.', 'danger')
             return redirect(url_for('index'))
-    
+
+        if datetime.now() > record['expiry']:
+            verification_data.pop(email, None)
+            flash('Code expired. Please sign up again.', 'danger')
+            return redirect(url_for('index'))
+
+        if entered != record['code']:
+            flash('Invalid code. Try again.', 'danger')
+            return redirect(url_for('verify', email=email))
+
+        # Attempt the insert
+        signup_resp = signup_user(record['data'])
+
+        # Check the returned data list
+        if signup_resp.data and isinstance(signup_resp.data, list) and len(signup_resp.data) > 0:
+            flash('Signup complete! You can now log in.', 'success')
+        else:
+            # Insertion failed for some reason
+            flash('Signup failed: no user was created.', 'danger')
+            return redirect(url_for('index'))
+
+        # Clean up and redirect
+        verification_data.pop(email, None)
+        session.pop('signup_data', None)
+        return redirect(url_for('index'))
+
     return render_template('verify.html', email=email)
+
 
 @app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            session['username'] = user.username
-            flash('Logged in successfully!', 'success')
-            if user.is_admin:
-                return redirect(url_for('admin_dashboard'))
-            else:
-                return redirect(url_for('dashboard'))
-        
-        flash('Invalid username or password!', 'danger')
-        return redirect(url_for('index'))
-    
-    return render_template('index.html')
+    username = request.form['username']
+    password = request.form['password']
+
+    # Fetch exactly one user with that username
+    resp = supabase \
+        .from_("user") \
+        .select("*") \
+        .eq("username", username) \
+        .single() \
+        .execute()
+
+    # If no data, user not found
+    user = resp.data if resp.data else None
+
+    if user and check_password_hash(user['password'], password):
+        session['user_id']   = user['id']
+        session['username']  = user['username']
+        flash('Logged in successfully!', 'success')
+        return redirect(
+            url_for('admin_dashboard') if user.get('is_admin')
+            else url_for('dashboard')
+        )
+
+    flash('Invalid username or password!', 'danger')
+    return redirect(url_for('index'))
+
 
 @app.route('/')
 def index():
