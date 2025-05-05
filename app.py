@@ -33,15 +33,16 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.secret_key = app.config['SECRET_KEY']
 
 # Configure the Gemini API key
-genai.configure(api_key="AIzaSyATFqI_3BL0y78m9R3XTwKcHLMiCURbMcI")
+GEMINI_KEY = os.getenv('GEMINI_API_KEY')
+genai.configure(api_key=GEMINI_KEY)
 
 # Whisper API configuration
 WHISPER_API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
 WHISPER_HEADERS = {"Authorization": "Bearer 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"}
 
 # WeatherAPI configuration
-WEATHER_API_KEY = "c0363e5d2fde46e098f134021252001"
-WEATHER_BASE_URL = "http://api.weatherapi.com/v1/forecast.json"
+WEATHER_API_KEY = os.getenv('WEATHER_API_KEY')
+WEATHER_BASE_URL = os.getenv('WEATHER_BASE_URL', 'https://api.weatherapi.com/v1/current.json')
 
 # Initialize the translator
 translator = Translator()
@@ -57,14 +58,14 @@ WHEAT_ACTUAL_FILE = 'data/wheat_actual.csv'
 WHEAT_PRED_FILE = 'data/wheat_pred.csv'
 
 #email verification
-EMAIL_VERIFICATION_API_KEY = 'b814452326e648f483566594dc079eab'
+EMAIL_VERIFICATION_API_KEY = os.getenv('EMAIL_VERIFICATION_API_KEY')
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'agriverseofficial@gmail.com'  # Replace with your email
-app.config['MAIL_PASSWORD'] = 'adaj ools figk iduh'  # Replace with your email password
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASSWORD')  # Replace with your email password
 mail = Mail(app)
 
 # Update the UPLOAD_FOLDER to be an absolute path
