@@ -22,11 +22,16 @@ import json
 import math
 import secrets
 from supabase_client import supabase
+<<<<<<< Updated upstream
 from dotenv import load_dotenv
 from rag_utils import ask_sql_rag, upsert_weather
+=======
+# from dotenv import load_dotenv
+>>>>>>> Stashed changes
 
-# Load environment variables
-load_dotenv()
+
+# # Load environment variables
+# load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -768,6 +773,112 @@ def get_sugar_data():
 
     return jsonify(result)
 
+#for USD crop price comparison
+# @app.route('/external')
+# def external():
+#     try:
+#         # Read crop production data
+#         wheat_df = pd.read_csv('external_factor_data/wheat_production.csv')
+#         cotton_df = pd.read_csv('external_factor_data/cotton_production.csv')
+#         sugar_df = pd.read_csv('external_factor_data/sugar_production.csv')
+#         maize_df = pd.read_csv('external_factor_data/maize_production.csv')
+#         export_df = pd.read_csv('external_factor_data/export_trends_fake_data.csv')
+#         rainfall_df = pd.read_csv('external_factor_data/rainfall_crop_prices_2010_2025.csv')
+        
+#         # Read USD exchange rate data
+#         usd_df = pd.read_csv('external_factor_data/USD_PKR Historical Data.csv')
+        
+#         # Process USD data
+#         usd_dates = usd_df['Date'].tolist()
+#         usd_prices = usd_df['Price'].tolist()
+#         usd_open = usd_df['Open'].tolist()
+#         usd_high = usd_df['High'].tolist()
+#         usd_low = usd_df['Low'].tolist()
+#         usd_change_pct = usd_df['Change %'].str.rstrip('%').astype('float').tolist()
+
+#         # Get list of years
+#         years = wheat_df['YEAR'].unique().tolist()
+        
+#         # Get initial data (latest year)
+#         latest_year = years[-1]  # Get the last year from the list
+        
+#         # Convert data to lists for initial charts
+#         initial_wheat_data = [
+#             float(wheat_df[wheat_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+#             float(wheat_df[wheat_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+#             float(wheat_df[wheat_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+#             float(wheat_df[wheat_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+#         ]
+        
+#         initial_cotton_data = [
+#             float(cotton_df[cotton_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+#             float(cotton_df[cotton_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+#             float(cotton_df[cotton_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+#             float(cotton_df[cotton_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+#         ]
+        
+#         initial_sugar_data = [
+#             float(sugar_df[sugar_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+#             float(sugar_df[sugar_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+#             float(sugar_df[sugar_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+#             float(sugar_df[sugar_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+#         ]
+        
+#         initial_maize_data = [
+#             float(maize_df[maize_df['YEAR'] == latest_year]['Punjab'].iloc[0]),
+#             float(maize_df[maize_df['YEAR'] == latest_year]['Sindh'].iloc[0]),
+#             float(maize_df[maize_df['YEAR'] == latest_year]['KPK'].iloc[0]),
+#             float(maize_df[maize_df['YEAR'] == latest_year]['Balochistan'].iloc[0])
+#         ]
+
+#         # Process export trends data
+#         export_dates = (export_df['Year'].astype(str) + '-' + 
+#                        export_df['Month'].astype(str).str.zfill(2)).tolist()
+#         export_index = export_df['Export_Index'].tolist()
+#         export_prices = export_df['Price'].tolist()
+
+#         # Process rainfall and crop price data
+#         rainfall_years = rainfall_df['Year'].tolist()
+#         rainfall_data = rainfall_df['Rainfall (mm)'].tolist()
+#         crop_prices = rainfall_df['Crop Price (USD/ton)'].tolist()
+
+#     except Exception as e:
+#         flash(f'Error loading data: {str(e)}', 'danger')
+#         return redirect(url_for('index'))
+
+#     # Previous data for other charts
+#     petrol_df = pd.read_csv('external_factor_data/Petrol Prices.csv')
+#     petrol_dates = petrol_df['date'].tolist()
+#     petrol_prices = petrol_df['price'].tolist()
+
+#     inflation_df = pd.read_csv('external_factor_data/pakistan-inflation-rate-cpi.csv')
+#     inflation_dates = inflation_df['date'].tolist()
+#     inflation_rates = inflation_df['per_Capita'].tolist()
+
+#     return render_template('external.html',
+#         years=years,
+#         initial_wheat_data=initial_wheat_data,
+#         initial_cotton_data=initial_cotton_data,
+#         initial_sugar_data=initial_sugar_data,
+#         initial_maize_data=initial_maize_data,
+#         petrol_dates=json.dumps(petrol_dates),
+#         petrol_prices=json.dumps(petrol_prices),
+#         inflation_dates=json.dumps(inflation_dates),
+#         inflation_rates=json.dumps(inflation_rates),
+#         export_dates=json.dumps(export_dates),
+#         export_index=json.dumps(export_index),
+#         export_prices=json.dumps(export_prices),
+#         rainfall_years=json.dumps(rainfall_years),
+#         rainfall_data=json.dumps(rainfall_data),
+#         crop_prices=json.dumps(crop_prices),
+#         usd_dates=json.dumps(usd_dates),
+#         usd_prices=json.dumps(usd_prices),
+#         usd_open=json.dumps(usd_open),
+#         usd_high=json.dumps(usd_high),
+#         usd_low=json.dumps(usd_low),
+#         usd_change_pct=json.dumps(usd_change_pct),
+#         last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     )
 # Update the get_crop_data function to handle Wheat
 @app.route('/get_crop_data', methods=['GET'])
 def get_crop_data():
@@ -969,6 +1080,7 @@ def reset_password(email):
 
     return render_template('reset_password.html', email=email)
 
+
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
     try:
@@ -976,13 +1088,17 @@ def get_heatmap_data():
         crop = request.args.get('crop', '').strip().lower()
         print(f"Received crop: {crop}")
         by_product = request.args.get('by_product', '')
-
+       
         # Ensure a valid crop is selected
         if crop not in CROP_CSV_MAPPING:
             return jsonify({'error': 'Invalid or missing crop selection'}), 400
 
         # Load CSV based on selected crop
-        csv_path = CROP_CSV_MAPPING[crop]
+        if crop == "sugar":
+            csv_path = "data/final_sugar_province_actual.csv"
+            
+        else :
+            csv_path = CROP_CSV_MAPPING[crop]
         print(f"Loading CSV: {csv_path}")
         df = pd.read_csv(csv_path)
 
@@ -991,17 +1107,49 @@ def get_heatmap_data():
         print("Column Names:", df.columns)
         print(df.head())
 
-        # Data Cleaning & Processing
+        # Data Cleaning & Processing - Handle sugar differently
         df.columns = df.columns.str.lower()  # Standardize column names
-        df['province'] = df['province'].str.strip()
-        df['price'] = (df['minimum'] + df['maximum']) / 2
-        if crop == "wheat":
+        
+        # Special handling for sugar which has a simpler structure
+        if crop == "sugar":
+            # Sugar has only date, province, price columns
+            # Make sure these columns exist
+            required_columns = ['date', 'province', 'price']
+            for col in required_columns:
+                if col not in df.columns:
+                    return jsonify({'error': f'Missing required column: {col} in sugar_final.csv'}), 500
+                
+            # Ensure we have lat/long data for sugar provinces
+            province_locations = {
+                'punjab': {'lat': 31.1704, 'long': 72.7097},
+                'sindh': {'lat': 25.8943, 'long': 68.5247},
+                'kpk': {'lat': 34.9526, 'long': 72.3311},
+                'balochistan': {'lat': 28.4907, 'long': 65.0957}
+            }
+            
+            # Convert date and standardize province names
+            df['date'] = pd.to_datetime(df['date'])
+            df['province'] = df['province'].str.strip().str.lower()
+            
+            # Add lat/long based on province
+            df['lat'] = df['province'].apply(lambda x: province_locations.get(x, {}).get('lat', None))
+            df['long'] = df['province'].apply(lambda x: province_locations.get(x, {}).get('long', None))
+            
+            # Drop rows with missing lat/long
+            df = df.dropna(subset=['lat', 'long'])
+        
+        elif crop == "wheat":
+            df['province'] = df['province'].str.strip()
+            df['price'] = (df['minimum'] + df['maximum']) / 2
             df = df[['date', 'station_id', 'province', 'lat', 'long', 'maximum','price']]
             df['date'] = pd.to_datetime(df['date'])
             df = df.drop_duplicates()
             df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
             df['long'] = pd.to_numeric(df['long'], errors='coerce')
         else:
+            # For cotton and maize which have by_product_id
+            df['province'] = df['province'].str.strip()
+            df['price'] = (df['minimum'] + df['maximum']) / 2
             df = df[['date', 'station_id', 'by_product_id', 'province', 'lat', 'long', 'price']]
             df['date'] = pd.to_datetime(df['date'])
             df = df.drop_duplicates()
@@ -1010,39 +1158,35 @@ def get_heatmap_data():
 
         # Debug: Check unique dates before filtering
         print("Available Dates before filtering:", df['date'].unique())
-        # Apply by_product filter if provided
-        if by_product:
+        
+        # Apply by_product filter if provided and not sugar
+        if by_product and crop != "sugar":
             try:
                 by_product_id = int(by_product)
-                print("by product value",by_product_id)
+                print("by product value", by_product_id)
                 print(f"Filtering for by_product_id: {by_product_id}")
                 print("Available by_product_id values:", df['by_product_id'].unique())
                 df = df[df['by_product_id'] == by_product_id]
                 print(f"Rows after filtering by by_product_id: {len(df)}")
             except ValueError:
                 return jsonify({'error': 'Invalid by-product ID'}), 400
+                
+        # Check if dataframe is empty after filtering
         if df.empty:
             return jsonify({'error': 'No data available for the selected filters'}), 404
-        # Apply date filter
+            
+        # Apply date filter - get the latest date
         latest_date = df['date'].max()
-    # Convert to datetime object
-        latest_date = pd.to_datetime(latest_date)
-
-    # Format it to 'YYYY-MM-DD' (remove the time part)
+        # Format it to 'YYYY-MM-DD' (remove the time part)
         target_date = latest_date.strftime('%Y-%m-%d')
         df = df[df['date'] == target_date]
-        print(f"Rows after filtering by date {target_date}: {len(df)}")
-        # Ensure data is available
+        print(f"Rows after filtering by latest date {target_date}: {len(df)}")
         
-
-                # Create Folium Map
-                        
+        # Ensure data is available after date filtering
+        if df.empty:
+            return jsonify({'error': 'No data available for the latest date'}), 404
                 
-        # Ensure lat/lon are numeric
-        df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
-        df['long'] = pd.to_numeric(df['long'], errors='coerce')
-
-        # Create the map with an initial view
+        # Create Folium Map
         m = Map(
             location=[30.0, 70.0],  # Default center (Pakistan)
             zoom_start=4,  # Initial zoom
@@ -1051,16 +1195,6 @@ def get_heatmap_data():
             width="100%",
             height="350px"
         )
-
-        # Add the heatmap
-        heat_data = list(zip(df['lat'], df['long'], df['price']))  # Assuming price influences intensity
-        HeatMap(heat_data).add_to(m)
-
-        # **Fit map to the data points**
-        if not df.empty:
-            sw = [df['lat'].min(), df['long'].min()]  # Southwest corner
-            ne = [df['lat'].max(), df['long'].max()]  # Northeast corner
-            m.fit_bounds([sw, ne])  # Auto-zoom based on bounds
 
         # Prepare heatmap data
         heat_data = df[['lat', 'long', 'price']].dropna().values.tolist()
@@ -1075,6 +1209,7 @@ def get_heatmap_data():
             max_zoom=4,
         ).add_to(m)
 
+        # Add circle markers with tooltips
         for _, row in df.iterrows():
             folium.CircleMarker(
                 location=[row['lat'], row['long']],
@@ -1083,8 +1218,9 @@ def get_heatmap_data():
                 fill=True,
                 fill_color="transparent",  # Fully transparent fill
                 fill_opacity=0,  # 0 opacity to ensure invisibility
-                tooltip=f"Price: {row['price']:.2f} PKR"
+                tooltip=f"Province: {row['province']}, Price: {row['price']:.2f} PKR"
             ).add_to(m)
+            
         # Add color scale legend
         colormap = branca.colormap.LinearColormap(
             colors=['blue', 'green', 'yellow', 'red'],
@@ -1106,6 +1242,8 @@ def get_heatmap_data():
         })
 
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())  # Print detailed error traceback for debugging
         return jsonify({'error': str(e)}), 500
 if __name__ == '__main__':
     app.run(debug=True)

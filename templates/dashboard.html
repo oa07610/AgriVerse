@@ -675,8 +675,8 @@
             <label for="byProduct">By Product</label>
             <select id="byProduct">
               <option value="">Select by-product</option>
-              <option value="1">By Product 1</option>
-              <option value="2">By Product 2</option>
+              <option value="1">Phutti</option>
+              <option value="2">Lint Cotton</option>
             </select>
         </div>
 
@@ -729,8 +729,8 @@
           <label for="byProduct_cotton">By Product</label>
           <select id="byProduct_cotton">
             <option value="">Select by-product</option>
-            <option value="7">Phutti_7</option>
-            <option value="14">Lint_Cotton_14</option>
+            <option value="7">Phutti</option>
+            <option value="14">Lint Cotton</option>
           </select>
         </div>
         <div class="control-item" id="heatmap_byProductContainer_sugar" style="display: none;">
@@ -770,11 +770,11 @@
             </div>
             <div class="commodity-checkbox">
               <input type="checkbox" id="compareCottonByProduct1" value="Cotton-1">
-              <label for="compareCottonByProduct1">Cotton By-product 1</label>
+              <label for="compareCottonByProduct1">Phutti</label>
             </div>
             <div class="commodity-checkbox">
               <input type="checkbox" id="compareCottonByProduct2" value="Cotton-2">
-              <label for="compareCottonByProduct2">Cotton By-product 2</label>
+              <label for="compareCottonByProduct2">Lint_Cotton</label>
             </div>
             <div class="commodity-checkbox">
               <input type="checkbox" id="compareSugar" value="Sugar">
@@ -957,18 +957,18 @@ addStyleForDisabledCheckboxes();
               tension: 0.1,
               pointRadius: 0,
               pointHoverRadius: 0,
-              borderWidth: 3
+              borderWidth: 1
             });
 
             datasets.push({
               label: `${regionData.region} Predicted Prices`,
               data: predictedPricesMapped,
               borderColor: regionData.color_predicted,
-              fill: false,
+              fill: true,
               tension: 0.1,
               pointRadius: 0,
               pointHoverRadius: 0,
-              borderWidth: 1.5
+              borderWidth: 1
             });
           });
 
@@ -1207,20 +1207,20 @@ addStyleForDisabledCheckboxes();
                     borderColor: cropData.color_actual || '#2ecc71',
                     fill: false,
                     tension: 0.1,
-                    pointRadius: 2,
-                    pointHoverRadius: 5,
-                    borderWidth: 3
+                    pointRadius: 0,
+                    //pointHoverRadius: 0,
+                    borderWidth: 1
                   },
                   {
                     label: `${cropData.crop} Predicted Prices`,
                     data: predictedPricesMapped,
                     borderColor: cropData.color_predicted || '#3498db',
-                    fill: false,
+                    fill: true,
                     tension: 0.1,
                     pointRadius: 0,
                     pointHoverRadius: 3,
-                    borderWidth: 1.5,
-                    borderDash: [5, 5]
+                    borderWidth: 1,
+                    //borderDash: [5, 5]
                   }
                 ]
               },

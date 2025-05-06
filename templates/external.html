@@ -906,7 +906,7 @@ const usdCtx = document.getElementById('usdChart').getContext('2d');
                     label: 'USD/PKR',
                     data: {{ usd_prices | safe }},
                     borderColor: 'var(--chart-blue)',
-                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    backgroundColor: 'rgba(0, 229, 69, 0.48)',
                     borderWidth: 1,
                     tension: 0.1,
                     fill: true,
@@ -945,11 +945,13 @@ const usdCtx = document.getElementById('usdChart').getContext('2d');
                 },
                 scales: {
                     y: {
+                        
                         position: 'right',
                         beginAtZero: false,
                         grid: {
+                            display: false,
                             color: 'var(--chart-grid)',
-                            drawBorder: false
+                            drawBorder: true
                         },
                         ticks: {
                             color: '#666',
@@ -961,14 +963,14 @@ const usdCtx = document.getElementById('usdChart').getContext('2d');
                             }
                         },
                         border: {
-                            display: false
+                            display: true
                         }
                     },
                     x: {
                         grid: {
-                            display: true,
+                            display: false,
                             color: 'var(--chart-grid)',
-                            drawBorder: false
+                            drawBorder: true
                         },
                         ticks: {
                             color: '#666',
@@ -978,13 +980,13 @@ const usdCtx = document.getElementById('usdChart').getContext('2d');
                             maxRotation: 0
                         },
                         border: {
-                            display: false
+                            display: true
                         }
                     }
                 },
                 layout: {
                     padding: {
-                        top: 20,
+                        top: 10,
                         right: 20,
                         bottom: 20,
                         left: 20
