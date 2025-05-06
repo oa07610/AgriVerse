@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from flask_cors import CORS
 import google.generativeai as genai
 from googletrans import Translator
@@ -23,6 +23,7 @@ import math
 import secrets
 from supabase_client import supabase
 from dotenv import load_dotenv
+from rag_utils import ask_sql_rag, upsert_weather
 
 # Load environment variables
 load_dotenv()
@@ -577,108 +578,131 @@ def chatbot():
 
 #chatbot code#
 
-def transcribe_audio(audio_data):
-    try:
-        response = requests.post(WHISPER_API_URL, headers=WHISPER_HEADERS, data=audio_data)
-        output = response.json()
-        return output.get("text", "Error in transcription")
-    except Exception as e:
-        return f"Error in transcription: {str(e)}"
+# def transcribe_audio(audio_data):
+#     try:
+#         response = requests.post(WHISPER_API_URL, headers=WHISPER_HEADERS, data=audio_data)
+#         output = response.json()
+#         return output.get("text", "Error in transcription")
+#     except Exception as e:
+#         return f"Error in transcription: {str(e)}"
 
-def translate_roman_urdu(text):
-    translated = translator.translate(text, src='auto', dest='en')
-    return translated.text
+# def translate_roman_urdu(text):
+#     translated = translator.translate(text, src='auto', dest='en')
+#     return translated.text
 
-def get_weather_data(location):
-    try:
-        params = {"key": WEATHER_API_KEY, "q": location, "days": 1}
-        response = requests.get(WEATHER_BASE_URL, params=params)
-        data = response.json()
+# def get_weather_data(location):
+#     try:
+#         params = {"key": WEATHER_API_KEY, "q": location, "days": 1}
+#         response = requests.get(WEATHER_BASE_URL, params=params)
+#         data = response.json()
 
-        if "error" in data:
-            return f"Could not fetch weather data for '{location}'. Please try again."
+#         if "error" in data:
+#             return f"Could not fetch weather data for '{location}'. Please try again."
 
-        location_name = data["location"]["name"]
-        region = data["location"]["region"]
-        country = data["location"]["country"]
-        current = data["current"]
-        condition = current["condition"]["text"]
-        temp_c = current["temp_c"]
-        chance_of_rain = data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
+#         location_name = data["location"]["name"]
+#         region = data["location"]["region"]
+#         country = data["location"]["country"]
+#         current = data["current"]
+#         condition = current["condition"]["text"]
+#         temp_c = current["temp_c"]
+#         chance_of_rain = data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
 
-        return (f"Weather in {location_name}, {region}, {country}:\n"
-                f"- Condition: {condition}\n"
-                f"- Temperature: {temp_c}°C\n"
-                f"- Chance of Rain: {chance_of_rain}%")
-    except Exception as e:
-        return f"Error fetching weather data: {e}"
+#         return (f"Weather in {location_name}, {region}, {country}:\n"
+#                 f"- Condition: {condition}\n"
+#                 f"- Temperature: {temp_c}°C\n"
+#                 f"- Chance of Rain: {chance_of_rain}%")
+#     except Exception as e:
+#         return f"Error fetching weather data: {e}"
 
-def extract_location_with_gemini(query):
-    gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
-    prompt = f"""
-    Extract the location from the following user query. If no location is mentioned, return 'None'.
-    Query: {query}
-    Location:
-    """
-    response = gemini_model.generate_content(prompt)
-    location = response.text.strip()
-    return location if location.lower() != "none" else None
+# def extract_location_with_gemini(query):
+#     gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
+#     prompt = f"""
+#     Extract the location from the following user query. If no location is mentioned, return 'None'.
+#     Query: {query}
+#     Location:
+#     """
+#     response = gemini_model.generate_content(prompt)
+#     location = response.text.strip()
+#     return location if location.lower() != "none" else None
 
-def generate_gemini_answer(conversation_history):
-    gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
-    response = gemini_model.generate_content([f"""
-    You are a helpful and knowledgeable agricultural chatbot. Assist with crop-related and weather-related queries.
-    Use the provided weather information if applicable. If not, reply based on your general knowledge.
+# def generate_gemini_answer(conversation_history):
+#     gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
+#     response = gemini_model.generate_content([f"""
+#     You are a helpful and knowledgeable agricultural chatbot. Assist with crop-related and weather-related queries.
+#     Use the provided weather information if applicable. If not, reply based on your general knowledge.
 
-    ## Conversation History:
-    {conversation_history}
+#     ## Conversation History:
+#     {conversation_history}
 
-    ## Current User Query:
-    {conversation_history.splitlines()[-1]}
+#     ## Current User Query:
+#     {conversation_history.splitlines()[-1]}
 
-    ## Answer:
-    """])
-    return response.text
+#     ## Answer:
+#     """])
+#     return response.text
+
+# @app.route('/api/chat', methods=['POST'])
+# def chat():
+#     try:
+#         data = request.json
+#         input_type = data.get('type', 'text')
+        
+#         if input_type == 'audio':
+#             # Handle audio input
+#             audio_data = base64.b64decode(data['audio'].split(',')[1])
+#             user_message = transcribe_audio(audio_data)
+#             # Translate transcribed text to Urdu for display
+#             translated_output = GoogleTranslator(source="auto", target="ur").translate(user_message)
+#         else:
+#             # Handle text input
+#             user_message = data.get('message', '')
+            
+#         # Translate to English for processing
+#         translated_question = translate_roman_urdu(user_message)
+#         conversation_history = f"User: {translated_question}\n"
+        
+#         # Check for weather-related queries
+#         if "weather" in translated_question.lower() or "rain" in translated_question.lower():
+#             location = extract_location_with_gemini(translated_question)
+#             if not location:
+#                 location = "Pakistan"
+#             weather_response = get_weather_data(location)
+#             conversation_history += f"Weather Info: {weather_response}\n"
+        
+#         # Generate Gemini AI response
+#         response = generate_gemini_answer(conversation_history)
+        
+#         return jsonify({
+#             'response': response,
+#             'translated_question': translated_question,
+#             'urdu_translation': translated_output if input_type == 'audio' else None
+#         })
+    
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    try:
-        data = request.json
-        input_type = data.get('type', 'text')
-        
-        if input_type == 'audio':
-            # Handle audio input
-            audio_data = base64.b64decode(data['audio'].split(',')[1])
-            user_message = transcribe_audio(audio_data)
-            # Translate transcribed text to Urdu for display
-            translated_output = GoogleTranslator(source="auto", target="ur").translate(user_message)
-        else:
-            # Handle text input
-            user_message = data.get('message', '')
-            
-        # Translate to English for processing
-        translated_question = translate_roman_urdu(user_message)
-        conversation_history = f"User: {translated_question}\n"
-        
-        # Check for weather-related queries
-        if "weather" in translated_question.lower() or "rain" in translated_question.lower():
-            location = extract_location_with_gemini(translated_question)
-            if not location:
-                location = "Pakistan"
-            weather_response = get_weather_data(location)
-            conversation_history += f"Weather Info: {weather_response}\n"
-        
-        # Generate Gemini AI response
-        response = generate_gemini_answer(conversation_history)
-        
-        return jsonify({
-            'response': response,
-            'translated_question': translated_question,
-            'urdu_translation': translated_output if input_type == 'audio' else None
-        })
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    data = request.json
+    input_type = data.get('type','text')
+
+    # # Transcribe if audio
+    # if input_type=='audio':
+    #     audio_data = base64.b64decode(data['audio'].split(',')[1])
+    #     user_text = transcribe_audio(audio_data)
+    # else:
+    user_text = data.get('message','')
+
+    # Optional: detect if weather enrich needed
+    if 'weather' in user_text.lower():
+        # Example: static coords for Punjab
+        upsert_weather(31.0,74.0, date.today().isoformat(), 'Punjab')
+
+    # Ask via SQL‑first RAG
+    answer = ask_sql_rag(user_text)
+    return jsonify({'response': answer})
+
+
 # Update the get_sugar_data function to handle Wheat
 @app.route('/get_sugar_data', methods=['GET'])
 def get_sugar_data():
