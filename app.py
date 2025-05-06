@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from flask_cors import CORS
 import google.generativeai as genai
 from googletrans import Translator
@@ -23,7 +23,6 @@ import math
 import secrets
 from supabase_client import supabase
 from dotenv import load_dotenv
-from rag_utils import ask_sql_rag, upsert_weather
 
 # Load environment variables
 load_dotenv()
@@ -578,131 +577,108 @@ def chatbot():
 
 #chatbot code#
 
-# def transcribe_audio(audio_data):
-#     try:
-#         response = requests.post(WHISPER_API_URL, headers=WHISPER_HEADERS, data=audio_data)
-#         output = response.json()
-#         return output.get("text", "Error in transcription")
-#     except Exception as e:
-#         return f"Error in transcription: {str(e)}"
+def transcribe_audio(audio_data):
+    try:
+        response = requests.post(WHISPER_API_URL, headers=WHISPER_HEADERS, data=audio_data)
+        output = response.json()
+        return output.get("text", "Error in transcription")
+    except Exception as e:
+        return f"Error in transcription: {str(e)}"
 
-# def translate_roman_urdu(text):
-#     translated = translator.translate(text, src='auto', dest='en')
-#     return translated.text
+def translate_roman_urdu(text):
+    translated = translator.translate(text, src='auto', dest='en')
+    return translated.text
 
-# def get_weather_data(location):
-#     try:
-#         params = {"key": WEATHER_API_KEY, "q": location, "days": 1}
-#         response = requests.get(WEATHER_BASE_URL, params=params)
-#         data = response.json()
+def get_weather_data(location):
+    try:
+        params = {"key": WEATHER_API_KEY, "q": location, "days": 1}
+        response = requests.get(WEATHER_BASE_URL, params=params)
+        data = response.json()
 
-#         if "error" in data:
-#             return f"Could not fetch weather data for '{location}'. Please try again."
+        if "error" in data:
+            return f"Could not fetch weather data for '{location}'. Please try again."
 
-#         location_name = data["location"]["name"]
-#         region = data["location"]["region"]
-#         country = data["location"]["country"]
-#         current = data["current"]
-#         condition = current["condition"]["text"]
-#         temp_c = current["temp_c"]
-#         chance_of_rain = data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
+        location_name = data["location"]["name"]
+        region = data["location"]["region"]
+        country = data["location"]["country"]
+        current = data["current"]
+        condition = current["condition"]["text"]
+        temp_c = current["temp_c"]
+        chance_of_rain = data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
 
-#         return (f"Weather in {location_name}, {region}, {country}:\n"
-#                 f"- Condition: {condition}\n"
-#                 f"- Temperature: {temp_c}°C\n"
-#                 f"- Chance of Rain: {chance_of_rain}%")
-#     except Exception as e:
-#         return f"Error fetching weather data: {e}"
+        return (f"Weather in {location_name}, {region}, {country}:\n"
+                f"- Condition: {condition}\n"
+                f"- Temperature: {temp_c}°C\n"
+                f"- Chance of Rain: {chance_of_rain}%")
+    except Exception as e:
+        return f"Error fetching weather data: {e}"
 
-# def extract_location_with_gemini(query):
-#     gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
-#     prompt = f"""
-#     Extract the location from the following user query. If no location is mentioned, return 'None'.
-#     Query: {query}
-#     Location:
-#     """
-#     response = gemini_model.generate_content(prompt)
-#     location = response.text.strip()
-#     return location if location.lower() != "none" else None
+def extract_location_with_gemini(query):
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
+    prompt = f"""
+    Extract the location from the following user query. If no location is mentioned, return 'None'.
+    Query: {query}
+    Location:
+    """
+    response = gemini_model.generate_content(prompt)
+    location = response.text.strip()
+    return location if location.lower() != "none" else None
 
-# def generate_gemini_answer(conversation_history):
-#     gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
-#     response = gemini_model.generate_content([f"""
-#     You are a helpful and knowledgeable agricultural chatbot. Assist with crop-related and weather-related queries.
-#     Use the provided weather information if applicable. If not, reply based on your general knowledge.
+def generate_gemini_answer(conversation_history):
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash-002')
+    response = gemini_model.generate_content([f"""
+    You are a helpful and knowledgeable agricultural chatbot. Assist with crop-related and weather-related queries.
+    Use the provided weather information if applicable. If not, reply based on your general knowledge.
 
-#     ## Conversation History:
-#     {conversation_history}
+    ## Conversation History:
+    {conversation_history}
 
-#     ## Current User Query:
-#     {conversation_history.splitlines()[-1]}
+    ## Current User Query:
+    {conversation_history.splitlines()[-1]}
 
-#     ## Answer:
-#     """])
-#     return response.text
-
-# @app.route('/api/chat', methods=['POST'])
-# def chat():
-#     try:
-#         data = request.json
-#         input_type = data.get('type', 'text')
-        
-#         if input_type == 'audio':
-#             # Handle audio input
-#             audio_data = base64.b64decode(data['audio'].split(',')[1])
-#             user_message = transcribe_audio(audio_data)
-#             # Translate transcribed text to Urdu for display
-#             translated_output = GoogleTranslator(source="auto", target="ur").translate(user_message)
-#         else:
-#             # Handle text input
-#             user_message = data.get('message', '')
-            
-#         # Translate to English for processing
-#         translated_question = translate_roman_urdu(user_message)
-#         conversation_history = f"User: {translated_question}\n"
-        
-#         # Check for weather-related queries
-#         if "weather" in translated_question.lower() or "rain" in translated_question.lower():
-#             location = extract_location_with_gemini(translated_question)
-#             if not location:
-#                 location = "Pakistan"
-#             weather_response = get_weather_data(location)
-#             conversation_history += f"Weather Info: {weather_response}\n"
-        
-#         # Generate Gemini AI response
-#         response = generate_gemini_answer(conversation_history)
-        
-#         return jsonify({
-#             'response': response,
-#             'translated_question': translated_question,
-#             'urdu_translation': translated_output if input_type == 'audio' else None
-#         })
-    
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
+    ## Answer:
+    """])
+    return response.text
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    data = request.json
-    input_type = data.get('type','text')
-
-    # # Transcribe if audio
-    # if input_type=='audio':
-    #     audio_data = base64.b64decode(data['audio'].split(',')[1])
-    #     user_text = transcribe_audio(audio_data)
-    # else:
-    user_text = data.get('message','')
-
-    # Optional: detect if weather enrich needed
-    if 'weather' in user_text.lower():
-        # Example: static coords for Punjab
-        upsert_weather(31.0,74.0, date.today().isoformat(), 'Punjab')
-
-    # Ask via SQL‑first RAG
-    answer = ask_sql_rag(user_text)
-    return jsonify({'response': answer})
-
-
+    try:
+        data = request.json
+        input_type = data.get('type', 'text')
+        
+        if input_type == 'audio':
+            # Handle audio input
+            audio_data = base64.b64decode(data['audio'].split(',')[1])
+            user_message = transcribe_audio(audio_data)
+            # Translate transcribed text to Urdu for display
+            translated_output = GoogleTranslator(source="auto", target="ur").translate(user_message)
+        else:
+            # Handle text input
+            user_message = data.get('message', '')
+            
+        # Translate to English for processing
+        translated_question = translate_roman_urdu(user_message)
+        conversation_history = f"User: {translated_question}\n"
+        
+        # Check for weather-related queries
+        if "weather" in translated_question.lower() or "rain" in translated_question.lower():
+            location = extract_location_with_gemini(translated_question)
+            if not location:
+                location = "Pakistan"
+            weather_response = get_weather_data(location)
+            conversation_history += f"Weather Info: {weather_response}\n"
+        
+        # Generate Gemini AI response
+        response = generate_gemini_answer(conversation_history)
+        
+        return jsonify({
+            'response': response,
+            'translated_question': translated_question,
+            'urdu_translation': translated_output if input_type == 'audio' else None
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 # Update the get_sugar_data function to handle Wheat
 @app.route('/get_sugar_data', methods=['GET'])
 def get_sugar_data():
@@ -1107,5 +1083,159 @@ def get_heatmap_data():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+
+
+
+
+# ——— Utility: load and filter station-level data ———
+def load_station_trend(commodity: str, station_name: str):
+    """
+    Returns a DataFrame with columns [date, price, type], where
+      - type == 'actual'    for historical 2012–2016 data
+      - type == 'predicted' for forecast from Jan–Jun 2016
+    """
+    # --- 1) Historical CSV (2012–2016) ---
+    hist_path = os.path.join("data", f"{commodity.capitalize()}Master.csv")
+    hist = pd.read_csv(hist_path, parse_dates=["DATE"])
+    # filter by station, date range
+    hist = hist[
+        (hist["station_en"].str.lower() == station_name.lower()) &
+        (hist["DATE"] >= "2012-01-01") &
+        (hist["DATE"] <= "2016-12-31")
+    ].copy()
+    hist = hist.sort_values("DATE")
+    hist = hist[["DATE", "AVERAGE"]].rename(columns={"DATE": "date", "AVERAGE": "price"})
+    hist["type"] = "actual"
+
+    # --- 2) Predicted CSV (first half-2016) ---
+    pred_path = os.path.join("predicted_station_data", f"{commodity.capitalize()}Master_final.csv")
+    pred = pd.read_csv(pred_path, parse_dates=["DATE"])
+    # assume predicted-average lives in column named "PREDICTED_AVG" (adjust if different)
+    pred = pred[
+        (pred["station_en"].str.lower() == station_name.lower()) &
+        (pred["DATE"] >= "2016-01-01") &
+        (pred["DATE"] <= "2016-06-30")
+    ].copy()
+    pred = pred.sort_values("DATE")
+    pred = pred[["DATE", "PREDICTED_AVG"]].rename(columns={"DATE": "date", "PREDICTED_AVG": "price"})
+    pred["type"] = "predicted"
+
+    # --- 3) Combine and return ---
+    combined = pd.concat([hist, pred], ignore_index=True)
+    return combined
+
+# ——— New endpoint: station-level trend JSON ———
+@app.route("/get_station_trend")
+def get_station_trend():
+    # 0) Read the three URL parameters
+    crop       = request.args.get("crop",       "").strip().capitalize()
+    station    = request.args.get("station",    "").strip()
+    by_product = request.args.get("by_product", "").strip().lower()
+
+    if not crop or not station:
+        return jsonify({"error":"crop & station required"}), 400
+
+    # 1) Load the predicted CSV for both history & forecast
+    path = os.path.join("predicted_station_data", f"{crop}.csv")
+    if not os.path.exists(path):
+        return jsonify({"error":"no data for that crop"}), 404
+
+    df = pd.read_csv(path, parse_dates=[0])
+    df.columns = (
+        df.columns
+          .str.strip()
+          .str.lower()
+          .str.replace(" ", "_")
+    )
+    # trim text columns
+    df["station_en"]     = df["station_en"].str.strip()
+    if "by_product_en" in df.columns:
+        df["by_product_en"] = df["by_product_en"].str.strip().str.lower()
+
+    # 2) If a by-product was selected, drop all other rows
+    if by_product and "by_product_en" in df.columns:
+        df = df[df["by_product_en"] == by_product]
+
+    # 3) Now filter by station
+    sub = df[df["station_en"].str.lower() == station.lower()]
+    if sub.empty:
+        return jsonify({"error":"station not found"}), 404
+
+    # 4) Compute price = (minimum + maximum)/2
+    sub["price"] = (sub["minimum"] + sub["maximum"]) / 2
+
+    # 5) Split historical vs forecast by date
+    hist = sub[(sub["date"] >= "2012-01-01") & (sub["date"] <= "2015-12-31")]
+    pred = sub[(sub["date"] >= "2016-01-01") & (sub["date"] <= "2016-06-30")]
+
+    # 6) Tag and select
+    hist = hist[["date","price"]].copy(); hist["type"] = "actual"
+    pred = pred[["date","price"]].copy(); pred["type"] = "predicted"
+
+    # 7) Combine & sort
+    combined = pd.concat([hist, pred], ignore_index=True).sort_values("date")
+
+    # 8) Serialize to JSON
+    out = [
+        {
+          "date": row.date.strftime("%Y-%m-%d"),
+          "price": float(row.price),
+          "type":  row.type
+        }
+        for _, row in combined.iterrows()
+    ]
+    return jsonify(out)
+
+
+@app.route("/list_stations")
+def list_stations():
+    crop       = request.args.get("crop",       "").strip().capitalize()
+    province   = request.args.get("province",   "").strip().lower()
+    by_product = request.args.get("by_product", "").strip().lower()
+
+    if not crop:
+        return jsonify([]), 400
+
+    path = os.path.join("predicted_station_data", f"{crop}.csv")
+    if not os.path.exists(path):
+        return jsonify([]), 404
+
+    df = pd.read_csv(path)
+    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    df["station_en"]   = df["station_en"].str.strip()
+    df["province_en"]   = df["province_en"].str.strip().str.lower()
+    if "by_product_en" in df.columns:
+        df["by_product_en"] = df["by_product_en"].str.strip().str.lower()
+
+    # apply filters
+    if province:
+        df = df[df["province_en"] == province]
+    if by_product and "by_product_en" in df.columns:
+        df = df[df["by_product_en"] == by_product]
+
+    stations = sorted(df["station_en"].dropna().unique().tolist())
+    return jsonify(stations)
+
+
+
+@app.route("/list_by_products")
+def list_by_products():
+    crop = request.args.get("crop", "").strip().capitalize()
+    path = os.path.join("predicted_station_data", f"{crop}.csv")
+    if not os.path.exists(path):
+        return jsonify([]), 404
+
+    df = pd.read_csv(path)
+    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    if "by_product_en" not in df.columns:
+        return jsonify([])   # no by-products for this crop
+
+    prods = sorted(df["by_product_en"].dropna().unique().tolist())
+    return jsonify(prods)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
