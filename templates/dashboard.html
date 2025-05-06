@@ -801,6 +801,54 @@
         <!-- Charts will be dynamically added here -->
       </div>
     </div>
+
+
+    <!-- ── Station-wise 6-Month Forecast ── -->
+    <div class="graph-controls">
+      <h2 class="section-title">Station-wise 6-Month Forecast</h2>
+      <div class="control-grid">
+        <div class="control-item">
+          <label for="fwCrop">Select Crop</label>
+          <select id="fwCrop">
+            <option value="">Choose a crop</option>
+            <option value="Cotton">Cotton</option>
+            <!-- add Maize, Sugar, Wheat here when you have their CSVs -->
+          </select>
+            <!-- after your crop selector… -->
+          <div class="control-item" id="fwByProductContainer" style="display:none">
+            <label for="fwByProduct">By Product</label>
+            <select id="fwByProduct">
+              <option value="">All</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="fwProvince">Select Province</label>
+            <select id="fwProvince">
+              <option value="">All Provinces</option>
+              <option>Punjab</option>
+              <option>Sindh</option>
+              <option>KPK</option>
+              <option>Balochistan</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="control-item">
+          <label for="fwStation">Select Station</label>
+          <select id="fwStation">
+            <option value="">Choose a station</option>
+          </select>
+        </div>
+        <div class="control-item">
+          <button class="show-graph-btn" id="showStationForecast">Generate Forecast</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="stationForecastChart"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -1324,6 +1372,193 @@ document.getElementById('compareRegion').addEventListener('change', function() {
   }
   // For Punjab and Sindh, all crops are already enabled (default state)
 });
+
+
+// 1) Populate station dropdown on crop select
+document.getElementById('fwCrop').addEventListener('change', () => {
+  const crop = document.getElementById('fwCrop').value;
+  const sel  = document.getElementById('fwStation');
+  sel.innerHTML = '<option value="">Choose a station</option>'; 
+  if (!crop) return;
+
+  // Read only the predicted CSV for this crop
+  fetch(`/list_stations?crop=${crop}`) 
+    .then(r => {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    })
+    .then(stations => {
+      stations.forEach(st => {
+        const o = document.createElement('option');
+        o.value = st; 
+        o.text  = st;
+        sel.appendChild(o);
+      });
+    })
+    .catch(err => {
+      console.error('Station-list error:', err);
+      alert('Could not load station list');
+    });
+});
+
+// 2) On Generate, call get_station_trend and plot
+document.getElementById('showStationForecast').addEventListener('click', () => {
+  const crop    = document.getElementById('fwCrop').value;
+  const station = document.getElementById('fwStation').value;
+  if (!crop || !station) {
+    return alert('Please select both crop and station.');
+  }
+
+  const byProd = document.getElementById('fwByProduct').value;
+fetch(
+  `/get_station_trend?` +
+  `crop=${crop.toLowerCase()}` +
+  `&station=${encodeURIComponent(station)}` +
+  `&by_product=${encodeURIComponent(byProd)}`
+)
+
+    .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+    .then(data => {
+      const dates     = data.map(d=>d.date);
+      const actual    = data.map(d=> d.type==='actual'    ? d.price : null);
+      const predicted = data.map(d=> d.type==='predicted' ? d.price : null);
+
+      const ctx = document.getElementById('stationForecastChart').getContext('2d');
+
+      // Safe-destroy
+      if (window.stationForecastChart && typeof window.stationForecastChart.destroy === 'function') {
+        window.stationForecastChart.destroy();
+      }
+
+      window.stationForecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Historical (2012–2015)',
+              data: actual,
+              borderColor: '#27ae60',
+              borderWidth: 3,
+              fill: false,
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              tension: 0.1
+            },
+            {
+              label: 'Forecast (Jan–Jun 2016)',
+              data: predicted,
+              borderColor: '#2ecc71',
+              borderDash: [4,4],
+              borderWidth: 1.5,
+              fill: false,
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          // ← interactive hover/tooltip settings
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            tooltip: {
+              enabled: true,
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
+              }
+            },
+            legend: {
+              labels: { usePointStyle: true }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: { unit: 'month' },
+              title: { display: true, text: 'Date' }
+            },
+            y: {
+              title: { display: true, text: 'Price' }
+            }
+          }
+        }
+      });
+    })
+    .catch(err => alert('Error loading forecast: '+err));
+});
+
+const cropEl     = document.getElementById('fwCrop');
+const byProdEl   = document.getElementById('fwByProduct');
+const byProdCont = document.getElementById('fwByProductContainer');
+const provEl     = document.getElementById('fwProvince');
+const stationEl  = document.getElementById('fwStation');
+
+// 1) On crop change: load by-products then stations
+cropEl.addEventListener('change', () => {
+  const crop = cropEl.value;
+  // reset
+  provEl.value = '';
+  stationEl.innerHTML = '<option value="">Choose a station</option>';
+
+  if (!crop) {
+    byProdCont.style.display = 'none';
+    return;
+  }
+
+  // fetch by-products
+  fetch(`/list_by_products?crop=${crop}`)
+    .then(r => r.json())
+    .then(list => {
+      if (list.length) {
+        byProdEl.innerHTML = '<option value="">All</option>';
+        list.forEach(p => byProdEl.append(new Option(p, p)));
+        byProdCont.style.display = 'block';
+      } else {
+        byProdCont.style.display = 'none';
+      }
+      loadStations();
+    })
+    .catch(() => {
+      byProdCont.style.display = 'none';
+      loadStations();
+    });
+});
+
+// 2) On by-product or province change: reload stations
+byProdEl.addEventListener('change', loadStations);
+provEl.addEventListener('change', loadStations);
+
+function loadStations() {
+  const crop   = cropEl.value;
+  const prov   = provEl.value;
+  const byProd = byProdEl.value;
+
+  stationEl.innerHTML = '<option value="">Choose a station</option>';
+  if (!crop) return;
+
+  const params = new URLSearchParams({ crop });
+  if (byProd) params.set('by_product', byProd);
+  if (prov)   params.set('province', prov);
+
+  fetch(`/list_stations?${params}`)
+    .then(r => r.json())
+    .then(list => {
+      list.forEach(s => stationEl.append(new Option(s, s)));
+    })
+    .catch(console.error);
+}
+
+
+
   </script>
   
 </body>
