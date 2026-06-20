@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #f8f9fa;
+            --accent-color: #3498db;
+            --background-color: #f5f6fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .create-post-form {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            box-shadow: var(--box-shadow);
+            margin: 0.75rem auto;
+            max-width: 800px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            border-radius: var(--border-radius);
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .back-btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.3s ease;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 0.6rem;
+            background: var(--secondary-color);
+            border: 1px dashed #e2e8f0;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            width: 0;
+            height: 0;
+            opacity: 0;
+        }
+
+        /* Added styles for image preview */
+        .image-preview {
+            max-width: 100%;
+            max-height: 80px;
+            margin-top: 5px;
+            display: none;
+            border-radius: var(--border-radius);
+        }
+        
+        .resize-options {
+            margin-top: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .resize-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-right: 5px;
+        }
+
+        /* Upload status indicator */
+        #upload-status {
+            margin-top: 5px;
+            color: #3498db;
+            font-size: 0.8rem;
+        }
+
+        /* Animation for loading spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .file-name {
+            margin-top: 3px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .ri-image-add-line,
+        .ri-video-line,
+        .ri-send-plane-line {
+            font-size: 0.9rem;
+        }
+        
+        /* Formatting toolbar */
+        .format-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .format-btn {
+            background: var(--secondary-color);
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .format-btn:hover {
+            background: rgba(46, 204, 113, 0.1);
+            border-color: var(--primary-color);
+        }
+        
+        .format-btn i {
+            font-size: 0.8rem;
+        }
+        
+        /* Rich text editor area */
+        #editor {
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 10px;
+            min-height: 150px;
+            margin-bottom: 10px;
+            background: white;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+        
+        #editor:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+        }
+        
+        /* Content preview section */
+        .content-preview {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            background: white;
+            display: none;
+        }
+        
+        .content-preview-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+        
+        .content-preview-body {
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        
+        .preview-btn {
+            background: var(--secondary-color);
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+        }
+        
+        .preview-btn:hover {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+            <i class="ri-arrow-left-line"></i>
+            Back to Dashboard
+        </a>
+
+        <div class="create-post-form">
+            <h2>Create New Post</h2>
+            
+            <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="content" class="form-label">Content</label>
+                    <div class="format-toolbar">
+                        <button type="button" class="format-btn" data-command="formatBlock" data-value="h2">
+                            <i class="ri-heading"></i> Heading
+                        </button>
+                        <button type="button" class="format-btn" data-command="bold">
+                            <i class="ri-bold"></i> Bold
+                        </button>
+                        <button type="button" class="format-btn" data-command="italic">
+                            <i class="ri-italic"></i> Italic
+                        </button>
+                        <button type="button" class="format-btn" data-command="insertUnorderedList">
+                            <i class="ri-list-unordered"></i> Bullet List
+                        </button>
+                        <button type="button" class="format-btn" data-command="insertOrderedList">
+                            <i class="ri-list-ordered"></i> Number List
+                        </button>
+                    </div>
+                    
+                    <div id="editor" contenteditable="true"></div>
+                    <textarea id="content" name="content" style="display:none;"></textarea>
+                    
+                    <button type="button" class="preview-btn" id="toggle-preview">
+                        <i class="ri-eye-line"></i> Preview
+                    </button>
+                    
+                    <div class="content-preview">
+                        <div class="content-preview-title">Preview</div>
+                        <div class="content-preview-body"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Image</label>
+                    <div class="file-upload">
+                        <label for="post-image" class="file-upload-label">
+                            <i class="ri-image-add-line"></i>
+                            <span>Click to upload an image</span>
+                            <span class="file-name"></span>
+                        </label>
+                        <input type="file" id="post-image" name="image" class="file-input" accept="image/*">
+                    </div>
+                    <img id="image-preview" class="image-preview">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Video</label>
+                    <div class="file-upload">
+                        <label class="file-upload-label">
+                            <i class="ri-video-line me-2"></i>
+                            Click to upload video
+                            <input type="file" name="video" accept="video/*">
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="upload-status" style="display: none; margin-top: 5px; color: #3498db;">
+                    <i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>
+                    <span>Uploading image...</span>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="ri-send-plane-line me-2"></i>
+                    Publish Post
+                </button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const editor = document.getElementById('editor');
+            const contentInput = document.getElementById('content');
+            const imageInput = document.getElementById('post-image');
+            const imagePreview = document.getElementById('image-preview');
+            const fileName = document.querySelector('.file-name');
+            const uploadStatus = document.getElementById('upload-status');
+            const previewBtn = document.getElementById('toggle-preview');
+            const contentPreview = document.querySelector('.content-preview');
+            const contentPreviewBody = document.querySelector('.content-preview-body');
+            
+            // Format toolbar functionality
+            document.querySelectorAll('.format-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const command = this.dataset.command;
+                    const value = this.dataset.value || '';
+                    
+                    document.execCommand(command, false, value);
+                    editor.focus();
+                });
+            });
+            
+            // Toggle preview
+            if (previewBtn) {
+                previewBtn.addEventListener('click', function() {
+                    contentPreviewBody.innerHTML = editor.innerHTML;
+                    
+                    if (contentPreview.style.display === 'block') {
+                        contentPreview.style.display = 'none';
+                        this.innerHTML = '<i class="ri-eye-line"></i> Preview';
+                    } else {
+                        contentPreview.style.display = 'block';
+                        this.innerHTML = '<i class="ri-eye-off-line"></i> Hide Preview';
+                    }
+                });
+            }
+            
+            // Transfer formatted content to hidden textarea before form submission
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    contentInput.value = editor.innerHTML;
+                    
+                    const hasImage = imageInput && imageInput.files.length > 0;
+                    
+                    if (hasImage && uploadStatus) {
+                        uploadStatus.style.display = 'block';
+                    }
+                });
+            }
+            
+            // Image preview functionality
+            if (imageInput) {
+                imageInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const fileSizeMB = (file.size / (512 * 512)).toFixed(2);
+                        
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                            fileName.textContent = `${file.name} (${fileSizeMB} MB)`;
+                        }
+                        
+                        reader.readAsDataURL(file);
+                    } else {
+                        imagePreview.style.display = 'none';
+                        fileName.textContent = '';
+                    }
+                });
+            }
+
+            // Display selected file names for video upload as well
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                if (input.id !== 'post-image') { // Skip the image input as it's handled separately
+                    input.addEventListener('change', function() {
+                        const label = this.parentElement;
+                        if (this.files.length > 0) {
+                            const file = this.files[0];
+                            const fileSizeMB = (file.size / (512 * 512)).toFixed(2);
+                            label.innerHTML = `
+                                <i class="ri-video-line me-2"></i>
+                                ${file.name} (${fileSizeMB} MB)
+                                <input type="file" name="${this.name}" accept="${this.accept}">
+                            `;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

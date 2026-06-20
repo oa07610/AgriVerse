@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup - AgriVerse</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Google Translate -->
+    <meta name="google" content="notranslate">
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #f8f9fa;
+            --accent-color: #3498db;
+            --background-color: #f5f6fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --top-bar-height: 50px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('/static/bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .navbar {
+            padding: 0 1.25rem;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            height: var(--top-bar-height);
+        }
+
+        .navbar a {
+            color: white;
+            font-weight: normal;
+            font-size: 0.8em;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .navbar .btn-login {
+            background: #4caf50;
+            color: black;
+            border-radius: 40px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            font-weight: 250;
+            font-size: 0.7em;
+            border: none;
+            cursor: pointer;
+        }
+
+        .navbar .btn-login:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo a {
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .logo a:hover {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .hero-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 100px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text {
+            color: white;
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .hero-text h1 {
+            font-size: 1.8em;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-top: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge {
+            padding: 8px 12px;
+            font-size: 0.7em;
+            font-weight: 500;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 10px;
+            background-color: #4caf50 !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            background: white;
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 280px;
+            margin: 0;
+            flex-shrink: 0;
+            max-width: 280px;
+            transition: var(--transition);
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-container h3 {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 8px;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-container input:focus {
+            border-color: #4caf50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .password-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.6em;
+        }
+
+        .btn-green {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 0.8rem;
+            font-weight: 500;
+        }
+
+        .btn-green:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
+        }
+
+        .terms {
+            font-size: 0.75rem;
+            text-align: left;
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .terms input[type="checkbox"] {
+            width: auto;
+            margin-right: 4px;
+            margin-top: 2px;
+        }
+
+        .auth-toggle-text {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .auth-toggle-text a {
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-toggle-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .forgot-password {
+            font-size: 0.75rem;
+            text-align: right;
+            margin-top: -0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .forgot-password a {
+            color: #4caf50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.7rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .flash-messages {
+            font-size: 0.7rem;
+            padding: 0.6rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        /* IMPROVED GOOGLE TRANSLATE STYLING */
+        /* Hide Google Translate toolbar at the top */
+        .goog-te-banner-frame,
+        
+        .goog-te-gadget-icon {
+            display: none !important;
+        }
+
+        body {
+            top: 0 !important;
+        }
+
+        .language-selector {
+            transform: scale(1.25);
+            transform-origin: right center;
+        }
+
+        .goog-te-gadget-simple {
+            padding: 10px 20px !important;
+            font-size: 0.8em !important;
+        }
+        /* Custom Google Translate button styling */
+        .language-selector {
+            position: relative;
+            margin-right: 15px;
+        }
+
+        #google_translate_element select {
+            display: none;
+        }
+
+        .goog-te-gadget {
+            font-family: 'Poppins', sans-serif !important;
+            color: white !important;
+            margin: 0;
+        }
+
+        .goog-te-gadget-simple {
+            background-color: #4caf50 !important;
+            border: none !important;
+            border-radius: 40px !important;
+            padding: 8px 15px !important;
+            font-size: 0.8em !important;
+            cursor: pointer !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .goog-te-gadget-simple:hover {
+            background-color: #388e3c !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .goog-te-menu-value {
+            color: white !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            font-weight: 500 !important;
+        }
+
+        .goog-te-menu-value span {
+            color: white !important;
+            text-decoration: none !important;
+            font-size: 0.8em !important;
+        }
+
+        /* Style the dropdown */
+        .goog-te-menu2 {
+            border-radius: 8px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .goog-te-menu2-item {
+            padding: 8px 12px !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-size: 0.9em !important;
+        }
+
+        .goog-te-menu2-item:hover {
+            background-color: #f0f8f0 !important;
+            color: #4caf50 !important;
+        }
+
+        .goog-te-menu2-item div {
+            color: #333 !important;
+        }
+
+        .goog-te-menu2-item-selected {
+            background-color: #e8f5e9 !important;
+        }
+
+        .goog-te-menu2-item-selected div {
+            color: #4caf50 !important;
+            font-weight: 500 !important;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px;
+                margin-top: 60px;
+            }
+
+            .hero-text {
+                margin-bottom: 30px;
+            }
+
+            .form-container {
+                width: 280px;
+                max-width: 280px;
+                padding: 20px;
+            }
+            
+            .navbar {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+            }
+            
+            .google-translate-container {
+                margin-right: 10px;
+            }
+            
+            .goog-te-gadget-simple {
+                padding: 6px 12px !important;
+                font-size: 0.7em !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="/">Agri<span style="color:#4caf50">Verse</span>.</a>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <!-- Google Translate Element -->
+            <div class="language-selector" id="google_translate_element"></div>
+            <a href="#" class="btn btn-login" id="toggle-form">Sign Up</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-text">
+            <span class="badge bg-success">JOIN OUR PLATFORM to</span>
+            <h1>empower Farmers, predict prices, secure futures</h1>
+        </div>
+
+        <!-- Login/Signup Form -->
+        <div class="form-container">
+            <h3 id="form-title">Login</h3>
+
+            <!-- Flash Messages from Flask -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form id="auth-form" action="/login" method="post" onsubmit="return validateForm(event)">
+                <div class="input-group">
+                    <input type="text" name="username" id="username" placeholder="Username" required>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+                
+                <div id="signup-fields" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" name="fullname" id="fullname" placeholder="Full Name">
+                        <div class="error-message" id="fullname-error"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" name="email" id="email" placeholder="Email">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="tel" name="phone" id="phone" placeholder="Phone">
+                        <div class="error-message" id="phone-error"></div>
+                    </div>
+                </div>
+                
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                
+                <!-- Forgot Password Link - Only visible in login mode -->
+                <div class="forgot-password" id="forgot-password-link">
+                    <a href="/forgot-password">Forgot Username/Password?</a>
+                </div>
+                
+                <div class="password-container" id="confirm-password-container" style="display: none;">
+                    <input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <div class="error-message" id="confirm-password-error"></div>
+                </div>
+
+                <button type="submit" class="btn-green" id="form-submit-btn">Login</button>
+
+                <p class="auth-toggle-text">
+                    Don't have an account? <a href="#" class="toggle-link" id="toggle-auth">Sign Up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,ur,pa,sd,ps,bal', // Pakistani languages only
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+            
+            // Add custom styling after Google Translate loads
+            setTimeout(enhanceTranslateUI, 1000);
+        }
+        
+        function enhanceTranslateUI() {
+            // Style the main container
+            const translateElements = document.querySelectorAll('.goog-te-gadget-simple');
+            translateElements.forEach(function(element) {
+                element.style.backgroundColor = '#4caf50';
+                element.style.borderRadius = '40px';
+                element.style.border = 'none';
+                element.style.padding = '8px 15px';
+                element.style.fontSize = '0.8em';
+                element.style.display = 'flex';
+                element.style.alignItems = 'center';
+                element.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            });
+            
+            // Style the Google Translate dropdown value
+            const menuValues = document.querySelectorAll('.goog-te-menu-value');
+            menuValues.forEach(function(value) {
+                value.style.color = 'white';
+                value.style.display = 'flex';
+                value.style.alignItems = 'center';
+                
+                // Find and style all spans inside
+                const spans = value.querySelectorAll('span');
+                spans.forEach(function(span) {
+                    span.style.color = 'white';
+                    span.style.fontSize = '0.8em';
+                });
+                
+                // Fix the arrow image to be white
+                const images = value.querySelectorAll('img');
+                images.forEach(function(img) {
+                    // Replace with a FontAwesome icon
+                    const parent = img.parentNode;
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-chevron-down';
+                    icon.style.color = 'white';
+                    icon.style.fontSize = '0.7em';
+                    icon.style.marginLeft = '5px';
+                    parent.replaceChild(icon, img);
+                });
+            });
+            
+            // Hide the original Google Translate icon
+            const icons = document.querySelectorAll('.goog-te-gadget-icon');
+            icons.forEach(icon => icon.style.display = 'none');
+        }
+        
+        // Enhance UI continuously
+        function continuallyEnhanceUI() {
+            // Hide the top bar
+            const frames = document.getElementsByClassName('goog-te-banner-frame');
+            for (let i = 0; i < frames.length; i++) {
+                frames[i].style.display = 'none';
+            }
+            
+            // Remove 'top: 40px' from body if it was added by Google
+            document.body.style.top = '0px';
+            
+            // Re-run the enhance function
+            enhanceTranslateUI();
+            
+            // Schedule next check
+            setTimeout(continuallyEnhanceUI, 1000);
+        }
+    </script>
+    
+    <!-- Main JavaScript -->
+    <script>
+        async function validateEmail(email) {
+            try {
+                const response = await fetch(`/validate_email?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                return data.is_valid;
+            } catch (error) {
+                console.error('Error validating email:', error);
+                return false;
+            }
+        }
+        
+        function showError(fieldId, message) {
+            const errorDiv = document.getElementById(`${fieldId}-error`);
+            const input = document.getElementById(fieldId);
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            input.classList.add('input-error');
+        }
+
+        function clearErrors() {
+            const errorDivs = document.querySelectorAll('.error-message');
+            const inputs = document.querySelectorAll('input');
+            errorDivs.forEach(div => div.style.display = 'none');
+            inputs.forEach(input => input.classList.remove('input-error'));
+        }
+        
+        async function validateForm(event) {
+            const formTitle = document.getElementById('form-title').innerText;
+            
+            if (formTitle === 'Sign Up') {
+                event.preventDefault();
+                let isValid = true;
+                clearErrors();
+
+                // Username validation
+                const username = document.getElementById('username');
+                if (!/^[a-zA-Z0-9._]{3,15}$/.test(username.value)) {
+                    showError('username', 'Username must be 3-15 characters long, can include letters, numbers, underscores, and periods.');
+                    isValid = false;
+                }
+
+                // Email validation
+                const email = document.getElementById('email');
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                    showError('email', 'Please enter a valid email address.');
+                    isValid = false;
+                }
+                
+                // Password validation
+                const password = document.getElementById('password');
+                if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"<>,.?/\\|~-])[A-Za-z\d!@#$%^&*()_+={}[\]:;"<>,.?/\\|`~-]{8,}$/.test(password.value)) {
+                    showError('password', 'Password must be at least 8 characters long, include uppercase, lowercase, number, and special character.');
+                    isValid = false;
+                }
+                
+                // Confirm password validation
+                const confirmPassword = document.getElementById('confirm-password');
+                if (confirmPassword.value !== password.value) {
+                    showError('confirm-password', 'Passwords do not match.');
+                    isValid = false;
+                }
+
+                // Phone validation
+                const phone = document.getElementById('phone');
+                if (!/^\d{11}$/.test(phone.value)) {
+                    showError('phone', 'Please enter a valid 11-digit phone number.');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const form = document.getElementById('auth-form');
+                    form.action = '/signup';
+                    form.submit();
+                }
+                return false;
+            }
+            return true;
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleAuthForm() {
+            const formTitle = document.getElementById("form-title");
+            const formAction = document.getElementById("auth-form");
+            const signupFields = document.getElementById("signup-fields");
+            const confirmPasswordContainer = document.getElementById("confirm-password-container");
+            const submitBtn = document.getElementById("form-submit-btn");
+            const toggleLink = document.getElementById("toggle-auth");
+            const termsText = document.getElementById("terms-text");
+            const termsCheckbox = document.getElementById("terms-checkbox");
+            const authToggleText = document.querySelector(".auth-toggle-text");
+            const forgotPasswordLink = document.getElementById("forgot-password-link");
+
+            clearErrors();
+
+            if (formTitle.innerText === "Login") {
+                formTitle.innerText = "Sign Up";
+                formAction.action = "/signup";
+                signupFields.style.display = "block";
+                confirmPasswordContainer.style.display = "block";
+                submitBtn.innerText = "Sign Up";
+                authToggleText.innerHTML = 'Have an account? <a href="/" class="toggle-link" id="toggle-auth">Login</a>';
+                termsText.style.display = "inline";
+                termsCheckbox.style.display = "inline";
+                forgotPasswordLink.style.display = "none"; // Hide forgot password in signup mode
+            } else {
+                formTitle.innerText = "Login";
+                formAction.action = "/login";
+                signupFields.style.display = "none";
+                confirmPasswordContainer.style.display = "none";
+                submitBtn.innerText = "Login";
+                authToggleText.innerHTML = 'Don\'t have an account? <a href="#" class="toggle-link" id="toggle-auth">Sign Up</a>';
+                termsText.style.display = "none";
+                termsCheckbox.style.display = "none";
+                forgotPasswordLink.style.display = "block"; // Show forgot password in login mode
+            }
+            
+            // Reattach event listener to the new toggle link
+            document.getElementById("toggle-auth").addEventListener("click", function(e) {
+                e.preventDefault();
+                toggleAuthForm();
+            });
+        }
+
+        // Initial event listeners
+        document.getElementById("toggle-auth").addEventListener("click", function(e) {
+            e.preventDefault();
+            toggleAuthForm();
+        });
+
+        document.getElementById("toggle-form").addEventListener("click", function(e) {
+            e.preventDefault();
+            toggleAuthForm();
+        });
+
+        // Clear flash messages when navigating back
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.querySelectorAll('.flash-messages').forEach(function(element) {
+                    element.style.display = 'none';
+                });
+            }
+        });
+        
+        // Start Google Translate improvements
+        window.addEventListener('load', function() {
+            // Load Google Translate script dynamically to ensure HTTPS
+            const googleScript = document.createElement('script');
+            googleScript.type = 'text/javascript';
+            googleScript.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            document.head.appendChild(googleScript);
+            
+            // Start continuous UI enhancement after a delay
+            setTimeout(continuallyEnhanceUI, 2000);
+        });
+    </script>
+</body>
+</html>

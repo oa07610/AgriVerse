@@ -1,0 +1,23 @@
+.env
+predicted_station_data/Cotton.csv
+predicted_station_data/Maize.csv
+predicted_station_data/Sugar.csv
+predicted_station_data/Wheat.csv
+predicted_station_data/maize-final.csv
+predicted_station_data/sugar-final.csv
+predicted_station_data/cotton-final.csv
+predicted_station_data/wheat-final.csv
+agribot.log
+new_data/WheatMaster.csv
+new_data/CottonMaster.csv
+new_data/MaizeMaster.csv
+new_data/SugarMaster.csv
+data
+__pycache__
+*.log
+agribot.log
+cache
+# Secrets
+*.json
+reverberant-joy-*.json
+.env

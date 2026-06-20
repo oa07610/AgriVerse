@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agriverse | Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <meta name="google" content="notranslate">
+  <style>
+    :root {
+      --primary-color: #2ecc71;
+      --primary-dark: #27ae60;
+      --secondary-color: #f8f9fa;
+      --accent-color: #3498db;
+      --background-color: #f5f6fa;
+      --card-background: #ffffff;
+      --text-primary: #2c3e50;
+      --text-secondary: #7f8c8d;
+      --success-color: #2ecc71;
+      --warning-color: #f1c40f;
+      --danger-color: #e74c3c;
+      --border-radius: 8px;
+      --box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --top-bar-height: 50px;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--top-bar-height);
+      background: var(--card-background);
+      padding: 0 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      z-index: 1000;
+    }
+    /* Top bar right section */
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .logo i {
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .logo h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 300px;
+      position: relative;
+      margin: 0 1rem;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 0.3rem 1rem 0.3rem 2rem;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--border-radius);
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+
+    .search-container input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      outline: none;
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: var(--top-bar-height);
+      left: 0;
+      height: calc(100% - var(--top-bar-height));
+      width: 200px;
+      background: var(--secondary-color);
+      color: var(--text-primary);
+      padding: 1rem;
+      z-index: 900;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .content {
+      margin-left: 200px;
+      margin-top: var(--top-bar-height);
+      padding: 1.25rem;
+      width: calc(100% - 200px);
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .notifications {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .notifications i {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .notifications::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 5px;
+      height: 5px;
+      background: var(--danger-color);
+      border-radius: 50%;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .user-role {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .logout-btn {
+      padding: 0.3rem;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      color: var(--danger-color);
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin-bottom: 0.2rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.6rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      font-size: 0.8rem;
+    }
+
+    .nav-link:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateX(2px);
+    }
+
+    .nav-link.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .nav-link i {
+      font-size: 1rem;
+    }
+
+    .page-title {
+      margin-bottom: 0.75rem;
+    }
+
+    .page-title h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .graph-controls {
+      background: var(--card-background);
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 1.25rem;
+      transition: var(--transition);
+    }
+
+    .graph-controls:hover {
+      transform: translateY(-2px);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-item label {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.15rem;
+      display: block;
+      font-size: 0.6rem;
+    }
+
+    .control-item select {
+      width: 100%;
+      padding: 0.2rem 0.3rem;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--border-radius);
+      font-size: 0.7rem;
+      transition: var(--transition);
+      appearance: none;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 0.6rem center;
+      background-size: 0.7rem;
+    }
+
+    .control-item select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+    }
+
+    /* Target the region checkbox labels specifically */
+    .region-checkbox label {
+      font-size: 0.75rem;
+      margin-left: 3px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    /* Adjust spacing between region options */
+    .regions-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-top: 4px;
+    }
+
+    .region-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      min-width: 60px;
+      margin-bottom: 3px;
+    } 
+
+    .region-checkbox input[type="checkbox"] {
+      margin: 0;
+      padding: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1px solid #e2e8f0;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .region-checkbox input[type="checkbox"]:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .show-graph-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .show-graph-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(46, 204, 113, 0.2);
+    }
+
+    .chart-container {
+      background: var(--card-background);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 1rem;
+      transition: var(--transition);
+      height: 320px;
+    }
+
+    .chart-container:hover {
+      transform: translateY(-2px);
+    }
+
+    .insights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .insight-card {
+      background: var(--card-background);
+      padding: 0.75rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .insight-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    }
+
+    .insight-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .insight-card h5 {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 0.6rem;
+    }
+
+    .insight-card p:first-of-type {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .insight-card p:last-of-type {
+      color: var(--success-color);
+      font-size: 0.6rem;
+      font-weight: 500;
+    }
+    .commodity-checkbox label {
+      font-size: 0.70rem;
+      margin-left: 2px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+      white-space: wrap;
+    }
+    /* Adjust spacing between region options */
+    .commodity-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 20px; /* Horizontal gap between items */
+      margin-top: 4px;
+    }
+    .commodity-comparison {
+      background: var(--card-background);
+      padding: 0.6rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+
+    .commodity-comparison:hover {
+      transform: translateY(-2px);
+    }
+
+    .commodity-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+      gap: 0.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .commodity-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      min-width: 60px;
+      margin-bottom: 3px;;
+    }
+
+    .commodity-checkbox input[type="checkbox"] {
+      width: 10px;
+      height: 10px;
+    }
+    .button-container {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    
+    /* Make the generate button responsive */
+    .generate-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 180px;
+    }
+    .generate-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(46, 204, 113, 0.2);
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    /* Add a loading indicator for chart generation */
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .loading-indicator i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      animation: spin 1s linear infinite;
+    }
+    /* Google Translate Styling */
+      .google-translate-container {
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .google-translate-container i {
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-right: 5px;
+      }
+
+      .goog-te-gadget {
+        font-family: "Poppins", sans-serif !important;
+        color: var(--text-primary) !important;
+        font-size: 0px !important; /* Hide Google branding text */
+      }
+
+      .goog-te-gadget .goog-te-combo {
+        padding: 2px 6px;
+        height: 26px;
+        border-radius: var(--border-radius);
+        border: 1px solid #e2e8f0;
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        background-color: white;
+        cursor: pointer;
+        outline: none;
+        font-family: "Poppins", sans-serif;
+        transition: var(--transition);
+      }
+
+      .goog-te-gadget .goog-te-combo:hover {
+        border-color: var(--primary-color);
+      }
+
+      .goog-te-gadget .goog-te-combo:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      }
+
+      /* Hide Google branding */
+      .goog-logo-link,
+      .goog-te-gadget span {
+        display: none !important;
+      }
+
+      .goog-te-banner-frame {
+        display: none !important;
+      }
+
+      .goog-te-menu-value {
+        color: var(--text-primary) !important;
+        text-decoration: none !important;
+      }
+      /* Fix for Google Translate dropdown positioning */
+      body > .skiptranslate {
+        display: none;
+      }
+
+      /* Remove Google Translate top bar */
+      .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+      }
+      body {
+        top: 0 !important;
+      }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+ 
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 180px;
+      }
+      .content {
+        margin-left: 180px;
+        width: calc(100% - 180px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 60px;
+        padding: 0.8rem 0.5rem;
+      }
+      .nav-link span {
+        display: none;
+      }
+      .content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+      }
+      .logo h2 {
+        display: none;
+      }
+      .search-container {
+        max-width: 160px;
+        margin: 0 0.45rem;
+      }
+      .user-info {
+        display: none;
+      }
+      .top-bar {
+        padding: 0 0.45rem;
+      }
+      .heatmapContainer {
+        padding: 0;
+        margin: 0;
+        height: 250px;
+        overflow: hidden;
+      }
+      .heatmapContainer iframe {
+        width: 100%;
+        height: 250px; 
+        display: block;
+        border: none;
+      }
+    }
+    
+    .welcome-message {
+      font-size: 0.75rem;
+    }
+    
+    
+
+    /* Hide the "Powered by Google" label */
+    .goog-logo-link {
+        display: none !important;
+    }
+
+    .goog-te-gadget .goog-te-gadget-icon {
+        display: none !important;
+    }
+    /* Optimize the layout for screens up to 1366px width (common laptop size) */
+    @media (max-width: 1366px) {
+      .content {
+        padding: 1rem;
+      }
+      
+      .chart-container {
+        height: 300px;
+      }
+      
+      .control-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.8rem;
+      }
+    }
+    .zoom-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      accent-color: #27ae60;
+    }
+
+    .chart-scroll-wrapper {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    /* Add tooltips to zoom controls */
+    .zoom-slider-container label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .zoom-slider-container input[type="range"] {
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .zoom-slider-container input[type="range"]:hover {
+      opacity: 0.9;
+    }
+
+    /* Add zoom reset button */
+    .zoom-reset-btn {
+      background: none;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .zoom-reset-btn:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+  </style>
+  <!-- Google Translate Script -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        },
+        "google_translate_element"
+      );
+    }
+  </script>
+  <script
+    type="text/javascript"
+    src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+  ></script>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="logo">
+      <i class="ri-leaf-line"></i>
+      <h2>Agri<span style="color: var(--primary-color)">Verse.</span></h2>
+    </div>
+    <div class="search-container">
+      <i class="ri-search-line"></i>
+      <input type="text" placeholder="Search..." />
+    </div>
+    <div class="top-bar-right">
+      <!-- Google Translate Element -->
+      <div class="google-translate-container">
+        <i class="ri-global-line"></i>
+        <div id="google_translate_element"></div>
+      </div>
+      <span class="welcome-message">Welcome, {{ session['username'] }}!</span>
+      <div class="user-avatar">{{ session['username'][0].upper() }}</div>
+      <button class="logout-btn">
+        <i class="ri-logout-box-r-line"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <ul class="nav-links">
+      <li class="nav-item">
+        <a href="/dashboard" class="nav-link active">
+          <i class="ri-dashboard-line"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/newsletter" class="nav-link">
+          <i class="ri-newspaper-line"></i>
+          <span>Newsletter</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/chatbot" class="nav-link">
+          <i class="ri-robot-line"></i>
+          <span>AgriBot</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/external" class="nav-link">
+            <i class="ri-line-chart-line"></i>
+            <span>External Trends</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/faqs" class="nav-link">
+          <i class="ri-home-smile-line"></i>
+          <span>FAQs</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="content">
+    <div class="page-title">
+      <h1>Analytics Dashboard</h1>
+      <p>Monitor commodity prices and trends across regions in real-time</p>
+    </div>
+    <!-- ── Station-wise 6-Month Forecast ── -->
+    <div class="graph-controls">
+      <h2 class="section-title">Station-wise 6-Month Forecast</h2>
+      <div class="control-grid">
+        <!-- Crop -->
+        <div class="control-item">
+          <label for="fwCrop">Select Crop</label>
+          <select id="fwCrop">
+            <option value="">Select Crop</option>
+            <option value="Cotton">Cotton</option>
+            <option value="Maize">Maize</option>
+            <option value="Sugar">Sugar</option>
+            <option value="Wheat">Wheat</option>
+          </select>
+        </div>
+      
+        <!-- By-Product (hidden until >1 choice) -->
+        <div class="control-item" id="fwByProductContainer" style="display:none">
+          <label for="fwByProduct">Select By-Product</label>
+          <select id="fwByProduct" disabled>
+            <option value="">Select By-Product</option>
+          </select>
+        </div>
+      
+        <!-- Province (hidden until crop selected) -->
+        <div class="control-item" id="fwProvinceContainer" style="display:none">
+          <label for="fwProvince">Select Province</label>
+          <select id="fwProvince" disabled>
+            <option value="">Select Province</option>
+          </select>
+        </div>
+      
+        <!-- Station (hidden until province selected) -->
+        <div class="control-item" id="fwStationContainer" style="display:none">
+          <label for="fwStation">Select Station</label>
+          <select id="fwStation" disabled>
+            <option value="">Select Station</option>
+          </select>
+        </div>
+      
+        <div class="control-item">
+          <button class="show-graph-btn" id="showStationForecast" disabled>Generate Forecast</button>
+        </div>
+      </div>
+      
+
+      <div class="zoom-slider-container" style="margin-top: 1rem;">
+        <label for="zoomSlider">Zoom (Timeline):</label>
+        <input type="range" id="zoomSlider" min="100" max="300" value="100" step="10">
+        <button id="resetZoomStation" class="zoom-reset-btn">Reset Zoom</button>
+      </div>
+      
+      <div class="chart-scroll-wrapper" style="overflow-x: auto; width: 100%;">
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+          <canvas id="stationForecastChart"></canvas>
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <!-- First Graph Section -->
+    <div class="graph-controls">
+      <h2 class="section-title">Regional Price Analysis</h2>
+      <div class="control-grid">
+        <div class="control-item">
+          <label for="crop">Select Crop</label>
+          <select id="crop">
+            <option value="">Choose a crop</option>
+            <option value="Sugar">Sugar</option>
+            <option value="Maize">Maize</option>
+            <option value="Cotton">Cotton</option>
+            <option value="Wheat">Wheat</option>
+          </select>
+        </div>
+
+        <div class="control-item" id="byProductContainer" style="display: none;">
+            <label for="byProduct">By Product</label>
+            <select id="byProduct">
+              <option value="">Select by-product</option>
+              <option value="7">Phutti</option>
+              <option value="14">Lint Cotton</option>
+            </select>
+        </div>
+
+        <div class="control-item">
+          <label>Select Regions</label>
+          <div class="regions-grid">
+            <div class="region-checkbox" id="regionPunjabContainer">
+              <input type="checkbox" id="regionPunjab" value="Punjab">
+              <label for="regionPunjab">Punjab</label>
+            </div>
+            <div class="region-checkbox" id="regionSindhContainer">
+              <input type="checkbox" id="regionSindh" value="Sindh">
+              <label for="regionSindh">Sindh</label>
+            </div>
+            <div class="region-checkbox" id="regionKPKContainer">
+              <input type="checkbox" id="regionKPK" value="KPK">
+              <label for="regionKPK">KPK</label>
+            </div>
+            <div class="region-checkbox" id="regionBalochistanContainer">
+              <input type="checkbox" id="regionBalochistan" value="Balochistan">
+              <label for="regionBalochistan">Balochistan</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-item">
+          <button class="show-graph-btn" id="showGraph">Generate Analysis</button>
+        </div>
+      </div>
+
+      <div class="zoom-slider-container" style="margin-top: 1rem;">
+        <label for="regionalZoomSlider">Zoom (Timeline):</label>
+        <input type="range" id="regionalZoomSlider" min="100" max="300" value="100" step="10">
+        <button id="resetZoomRegional" class="zoom-reset-btn">Reset Zoom</button>
+      </div>
+
+      <div class="chart-scroll-wrapper">
+        <div class="chart-container">
+          <canvas id="commodityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="graph-controls">
+      <h2 class="section-title">Price Distribution Heatmap</h2>
+      <div class="control-grid mb-4">
+        <div class="control-item">
+          <label for="heatmapCrop">Select Crop</label>
+          <select id="heatmapCrop" class="w-full">
+            <option value="">Choose a crop</option>
+            <option value="Cotton">Cotton</option>
+            <option value="Sugar">Sugar</option>
+            <option value="Maize">Maize</option>
+            <option value="Wheat">Wheat</option>
+          </select>
+        </div>
+        <div class="control-item" id="heatmap_byProductContainer_cotton" style="display: none;">
+          <label for="byProduct_cotton">By Product</label>
+          <select id="byProduct_cotton">
+            <option value="">Select by-product</option>
+            <option value="7">Phutti</option>
+            <option value="14">Lint Cotton</option>
+          </select>
+        </div>
+        
+      </div>
+      <div id="heatmapContainer" class="chart-container" style="height: 400px; width: 100%;"></div>
+    </div>
+    
+    <!-- Update the commodity checkboxes section -->
+    <div class="commodity-comparison">
+      <h2 class="section-title">Commodity Price Comparison</h2>
+      <div class="control-grid">
+        <div class="control-item">
+          <label for="compareRegion">Select Region</label>
+          <select id="compareRegion">
+            <option value="">Choose a region</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Sindh">Sindh</option>
+            <option value="KPK">KPK</option>
+            <option value="Balochistan">Balochistan</option>
+          </select>
+        </div>
+        
+        <div class="control-item">
+          <label>Select Commodities</label>
+          <div class="commodity-checkboxes">
+            <div class="commodity-checkbox">
+              <input type="checkbox" id="compareMaize" value="Maize">
+              <label for="compareMaize">Maize</label>
+            </div>
+            <div class="commodity-checkbox">
+              <input type="checkbox" id="compareCottonByProduct1" value="Cotton-1">
+              <label for="compareCottonByProduct1">Phutti</label>
+            </div>
+            <div class="commodity-checkbox">
+              <input type="checkbox" id="compareCottonByProduct2" value="Cotton-2">
+              <label for="compareCottonByProduct2">Lint_Cotton</label>
+            </div>
+            <div class="commodity-checkbox">
+              <input type="checkbox" id="compareSugar" value="Sugar">
+              <label for="compareSugar">Sugar</label>
+            </div>
+            <div class="commodity-checkbox">
+              <input type="checkbox" id="compareWheat" value="Wheat">
+              <label for="compareWheat">Wheat</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-item">
+          <button class="show-graph-btn" id="showComparisonGraph">Generate Comparison</button>
+        </div>
+      </div>
+
+      <div class="loading-indicator" id="comparisonLoading">
+        <i class="ri-loader-4-line"></i>
+        <p>Generating comparison charts...</p>
+      </div>
+
+      <div class="zoom-slider-container" style="margin-top: 1rem;">
+        <label for="comparisonZoomSlider">Zoom (Timeline):</label>
+        <input type="range" id="comparisonZoomSlider" min="100" max="300" value="100" step="10">
+        <button id="resetZoomComparison" class="zoom-reset-btn">Reset Zoom</button>
+      </div>
+
+      <div id="comparisonChartsContainer" style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Charts will be dynamically added here -->
+      </div>
+    </div>
+
+
+       
+  </div>
+
+  <!-- 1. Chart.js core -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 2. Luxon (date library) -->
+<script src="https://cdn.jsdelivr.net/npm/luxon@3"></script>
+<!-- 3. Chart.js adapter for Luxon -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
+<!-- 4. Zoom plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+
+  <script>
+    // register the zoom plugin
+  Chart.register(ChartZoom);
+
+    //for comodity comparison graph
+    
+    // Add an event listener to the logout button
+    document.querySelector('.logout-btn').addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent any default behavior
+      
+      // Show a confirmation dialog
+      const confirmLogout = confirm('Are you sure you want to logout?');
+      
+      // If the user confirms, redirect to the logout route
+      if (confirmLogout) {
+        window.location.href = "{{ url_for('logout') }}"; // Use Flask's url_for to generate the logout URL
+      }
+    });
+    // Add global styling for disabled checkboxes (both sections)
+const addStyleForDisabledCheckboxes = () => {
+  const style = document.createElement('style');
+  style.textContent = `
+    .commodity-checkbox input[type="checkbox"]:disabled + label,
+    .region-checkbox input[type="checkbox"]:disabled + label {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+// Execute once when page loads
+addStyleForDisabledCheckboxes();
+    document.getElementById('crop').addEventListener('change', function() {
+      const crop = this.value;
+      const byProductContainer = document.getElementById('byProductContainer');
+      
+      // Reset all region checkboxes to their default state and make all visible
+      document.getElementById('regionPunjab').disabled = false;
+      document.getElementById('regionSindh').disabled = false;
+      document.getElementById('regionKPK').disabled = false;
+      document.getElementById('regionBalochistan').disabled = false;
+      
+      document.getElementById('regionPunjab').checked = false;
+      document.getElementById('regionSindh').checked = false;
+      document.getElementById('regionKPK').checked = false;
+      document.getElementById('regionBalochistan').checked = false;
+      
+      // By default, show all regions
+      document.getElementById('regionKPKContainer').style.display = 'block';
+      document.getElementById('regionBalochistanContainer').style.display = 'block';
+      
+      // Apply specific logic based on crop selection
+      if (crop === 'Cotton' ) {
+        // For Cotton and Wheat: Disable KPK
+        document.getElementById('regionKPK').disabled = true;
+        document.getElementById('regionKPK').checked = false;
+        //document.getElementById('regionKPKContainer').style.display = 'none';
+        
+        // For Cotton only, show by-product container
+        if (crop === 'Cotton') {
+          byProductContainer.style.display = 'block';
+        } else {
+          byProductContainer.style.display = 'none';
+          document.getElementById('byProduct').value = '';
+        }
+      } 
+      else if (crop === 'Maize') {
+        // For Maize: Enable only Punjab; Disable others
+        document.getElementById('regionSindh').disabled = true;
+        document.getElementById('regionKPK').disabled = true;
+        document.getElementById('regionBalochistan').disabled = true;
+        
+        document.getElementById('regionSindh').checked = false;
+        document.getElementById('regionKPK').checked = false;
+        document.getElementById('regionBalochistan').checked = false;
+      }
+      else if (crop === 'Sugar') {
+        // For Sugar: Enable Punjab, Sindh, KPK; Disable Balochistan
+        document.getElementById('regionBalochistan').disabled = true;
+        document.getElementById('regionBalochistan').checked = false;
+        //document.getElementById('regionBalochistanContainer').style.display = 'none';
+      }
+      else if (crop === 'Wheat') {
+        // For Wheat: Enable Punjab, Sindh, Balochistan; Disable KPK
+        document.getElementById('regionKPK').disabled = true;
+        document.getElementById('regionKPK').checked = false;
+        //document.getElementById('regionBalochistanContainer').style.display = 'none';
+      }
+      
+      // For any crop other than Cotton, hide by-product container
+      if (crop !== 'Cotton') {
+        byProductContainer.style.display = 'none';
+        document.getElementById('byProduct').value = '';
+      }
+    });
+
+    document.getElementById('showGraph').addEventListener('click', function() {
+      const crop = document.getElementById('crop').value;
+      const byProduct = document.getElementById('byProduct').value;
+      
+      const regions = [];
+      if (document.getElementById('regionPunjab').checked) regions.push('Punjab');
+      if (document.getElementById('regionSindh').checked) regions.push('Sindh');
+      if (document.getElementById('regionKPK').checked) regions.push('KPK');
+      if (document.getElementById('regionBalochistan').checked) regions.push('Balochistan');
+
+      if (!crop || (!byProduct && crop === 'Cotton') || regions.length === 0) {
+        alert('Please select the required fields.');
+        return;
+      }
+
+      fetch(`/regional_price_analysis?crop=${crop}&regions=${regions.join(',')}&by_product=${byProduct}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data || data.length === 0) {
+            throw new Error('No data received from server');
+          }
+          
+          const ctx = document.getElementById('commodityChart').getContext('2d');
+
+          if (window.commodityChart instanceof Chart) {
+            window.commodityChart.destroy();
+          }
+
+          const allDates = Array.from(new Set(data.flatMap(regionData => [
+            ...regionData.dates_actual,
+            ...regionData.dates_predicted
+          ]))).sort();
+
+          const datasets = [];
+          data.forEach(regionData => {
+            const actualPricesMapped = allDates.map(date =>
+              regionData.dates_actual.includes(date)
+                ? regionData.actual_prices[regionData.dates_actual.indexOf(date)]
+                : null
+            );
+
+            const predictedPricesMapped = allDates.map(date =>
+              regionData.dates_predicted.includes(date)
+                ? regionData.predicted_prices[regionData.dates_predicted.indexOf(date)]
+                : null
+            );
+
+            datasets.push({
+              label: `${regionData.region} Actual Prices`,
+              data: actualPricesMapped,
+              borderColor: regionData.color_actual,
+              fill: false,
+              tension: 0.1,
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              borderWidth: 1
+            });
+
+            datasets.push({
+              label: `${regionData.region} Price Forecast`,
+              data: predictedPricesMapped,
+              borderColor: regionData.color_predicted,
+              fill: true,
+              tension: 0.1,
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              borderWidth: 1
+            });
+          });
+
+          window.commodityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: allDates,
+              datasets: datasets
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  type: 'time',
+                  time: { unit: 'month', tooltipFormat: 'YYYY-MM-DD' },
+                  title: { display: true, text: 'Date' },
+                  grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                  }
+                },
+                y: {
+                  title: { display: true, text: 'Price' },
+                  grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                  }
+                }
+              },
+              plugins: {
+                title: { 
+                  display: true, 
+                  text: `${crop} Price Trends`,
+                  font: {
+                    size: 16,
+                    weight: 'bold'
+                  }
+                },
+                legend: {
+                  labels: {
+                    usePointStyle: true,
+                    padding: 20
+                  }
+                },
+                zoom: {
+                  pan: { 
+                    enabled: true,
+                    mode: 'x'
+                  },
+                  zoom: {
+                    wheel: { 
+                      enabled: true 
+                    },
+                    pinch: { 
+                      enabled: true 
+                    },
+                    mode: 'x',
+                    onZoomComplete: function() {
+                      // Update zoom slider when zoom is complete
+                      updateZoomSlider('regionalZoomSlider', window.commodityChart);
+                    }
+                  }
+                }
+              }
+            }
+          });
+
+          // Set up the zoom slider for Regional Price Analysis
+          setupZoomSlider('regionalZoomSlider', 'resetZoomRegional', window.commodityChart);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          alert('Error fetching data. Please ensure the data is available for the selected regions and by product.');
+        });
+    });
+
+    // Listen for changes in the heatmap crop dropdown
+    document.getElementById('heatmapCrop').addEventListener('change', function() {
+      const crop = this.value;
+      const byProductCottonContainer = document.getElementById('heatmap_byProductContainer_cotton');
+      
+      // Hide the Cotton by-product dropdown initially
+      byProductCottonContainer.style.display = "none";
+      
+      // Show the Cotton by-product dropdown only if Cotton is selected
+      if (crop === 'Cotton') {
+        byProductCottonContainer.style.display = "block";
+      }
+      // Sugar no longer shows a by-product dropdown
+      
+      // Load heatmap for the selected crop
+      loadHeatmap();
+    });
+    
+    // Listen for changes in the Cotton by-product dropdown
+    document.getElementById('byProduct_cotton').addEventListener('change', function() {
+      loadHeatmap();
+    });
+    
+    function loadHeatmap() {
+      const crop = document.getElementById('heatmapCrop').value;
+      let byProduct = "";
+      
+      // Check selected by-product for Cotton only
+      if (crop === "Cotton") {
+        byProduct = document.getElementById('byProduct_cotton').value;
+      }
+      // Sugar now has no by-products, similar to Maize and Wheat
+      
+      fetch(`/get_heatmap_data?crop=${encodeURIComponent(crop)}&by_product=${encodeURIComponent(byProduct)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.error) {
+            console.error('Error:', data.error);
+            return;
+          }
+          
+          const container = document.getElementById('heatmapContainer');
+          container.innerHTML = ""; // Clear previous content
+          // Create a temporary div to insert the HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.map_html;
+          // Extract the iframe
+          const iframe = tempDiv.querySelector('iframe');
+          if (iframe) {
+            iframe.style.width = "100%";
+            iframe.style.height = "350px"; // Ensure it matches the container
+            iframe.style.border = "none"; // Remove border
+          }
+          // Append iframe to container
+          container.appendChild(tempDiv.firstElementChild);
+        })
+        .catch(error => {
+          console.error('Error fetching heatmap data:', error);
+          const container = document.getElementById('heatmapContainer');
+          container.innerHTML = `<div class="alert alert-danger">Error loading heatmap: ${error.message}</div>`;
+        });
+    }
+    
+    document.getElementById('showComparisonGraph').addEventListener('click', function() {
+      const region = document.getElementById('compareRegion').value;
+      const crops = [];
+      
+      if (document.getElementById('compareMaize').checked) crops.push('Maize');
+      if (document.getElementById('compareCottonByProduct1').checked) crops.push('Cotton-1');
+      if (document.getElementById('compareCottonByProduct2').checked) crops.push('Cotton-2');
+      if (document.getElementById('compareSugar').checked) crops.push('Sugar');
+      if (document.getElementById('compareWheat').checked) crops.push('Wheat');
+
+      if (!region || crops.length === 0) {
+        alert('Please select a region and at least one crop.');
+        return;
+      }
+
+      // Show loading indicator
+      const loadingIndicator = document.getElementById('comparisonLoading');
+      loadingIndicator.style.display = 'block';
+      
+      // Clear existing charts
+      const container = document.getElementById('comparisonChartsContainer');
+      container.innerHTML = '';
+      container.style.display = 'none';
+
+      // For debugging
+      console.log(`Fetching data for region: ${region}, crops: ${crops.join(',')}`);
+
+      // Create a canvas for each selected crop
+      crops.forEach((crop, index) => {
+        const chartDiv = document.createElement('div');
+        chartDiv.className = 'chart-container';
+        chartDiv.style.marginBottom = '20px';
+        chartDiv.style.height = '400px';
+        
+        const canvas = document.createElement('canvas');
+        canvas.id = `comparisonChart_${index}`;
+        chartDiv.appendChild(canvas);
+        container.appendChild(chartDiv);
+      });
+
+      fetch(`/price_comparsion?province=${encodeURIComponent(region)}&crops=${encodeURIComponent(crops.join(','))}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Hide loading indicator
+          loadingIndicator.style.display = 'none';
+          container.style.display = 'flex';
+          
+          console.log("Data received:", data);
+          
+          if (!data || !Array.isArray(data) || data.length === 0) {
+            throw new Error('No valid data received from server');
+          }
+
+          // Store all chart instances in an array
+          window.comparisonCharts = [];
+
+          data.forEach((cropData, index) => {
+            const canvas = document.getElementById(`comparisonChart_${index}`);
+            if (!canvas) {
+              console.error(`Canvas with id comparisonChart_${index} not found`);
+              return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              console.error('Could not get 2D context for canvas');
+              return;
+            }
+
+            const allDates = [
+              ...cropData.dates_actual || [],
+              ...cropData.dates_predicted || []
+            ].sort();
+
+            if (allDates.length === 0) {
+              console.error('No dates found in data');
+              return;
+            }
+
+            const actualPricesMapped = allDates.map(date =>
+              (cropData.dates_actual || []).includes(date)
+                ? cropData.actual_prices[(cropData.dates_actual || []).indexOf(date)]
+                : null
+            );
+
+            const predictedPricesMapped = allDates.map(date =>
+              (cropData.dates_predicted || []).includes(date)
+                ? cropData.predicted_prices[(cropData.dates_predicted || []).indexOf(date)]
+                : null
+            );
+
+            const chart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: allDates,
+                datasets: [
+                  {
+                    label: `${cropData.crop} Actual Prices`,
+                    data: actualPricesMapped,
+                    borderColor: cropData.color_actual || '#2ecc71',
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                    borderWidth: 1
+                  },
+                  {
+                    label: `${cropData.crop} Price Forecast`,
+                    data: predictedPricesMapped,
+                    borderColor: cropData.color_predicted || '#3498db',
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    type: 'time',
+                    time: { unit: 'month', tooltipFormat: 'YYYY-MM-DD' },
+                    title: { display: true, text: 'Date' },
+                    grid: {
+                      color: 'rgba(0,0,0,0.05)'
+                    }
+                  },
+                  y: {
+                    title: { display: true, text: 'Price' },
+                    grid: {
+                      color: 'rgba(0,0,0,0.05)'
+                    }
+                  }
+                },
+                plugins: {
+                  title: { 
+                    display: true, 
+                    text: `${cropData.crop} Price Trends in ${region}`,
+                    font: {
+                      size: 16,
+                      weight: 'bold'
+                    }
+                  },
+                  legend: {
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
+                  },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false
+                  },
+                  zoom: {
+                    pan: { 
+                      enabled: true, 
+                      mode: 'x'
+                    },
+                    zoom: {
+                      wheel: { 
+                        enabled: true 
+                      },
+                      pinch: { 
+                        enabled: true 
+                      },
+                      mode: 'x',
+                      onZoomComplete: function() {
+                        // Sync zoom across all comparison charts
+                        syncComparisonChartsZoom(chart);
+                      }
+                    }
+                  }
+                }
+              }
+            });
+
+            // Store the chart instance
+            window.comparisonCharts.push(chart);
+          });
+
+          // Set up zoom slider for Commodity Comparison
+          setupZoomSlider('comparisonZoomSlider', 'resetZoomComparison', window.comparisonCharts[0], 
+            function(zoomPercent) {
+              // Apply zoom to all comparison charts
+              window.comparisonCharts.forEach(chart => {
+                applyZoomToChart(chart, zoomPercent);
+              });
+            }
+          );
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          
+          // Hide loading indicator
+          loadingIndicator.style.display = 'none';
+          
+          // Show error message
+          container.style.display = 'block';
+          container.innerHTML = `
+            <div class="alert alert-danger" style="padding: 1rem; background-color: #fee2e2; color: #b91c1c; border-radius: 0.5rem; margin-bottom: 1rem;">
+              <p><strong>Error loading data:</strong> ${error.message}</p>
+              <p>Please ensure data is available for the selected region and crops.</p>
+            </div>
+          `;
+        });
+    });
+
+    // Sync zooming across all comparison charts
+    function syncComparisonChartsZoom(sourceChart) {
+      if (!window.comparisonCharts || window.comparisonCharts.length <= 1) return;
+      
+      const scales = sourceChart.scales;
+      const xMin = scales.x.min;
+      const xMax = scales.x.max;
+      
+      window.comparisonCharts.forEach(chart => {
+        if (chart !== sourceChart) {
+          chart.options.scales.x.min = xMin;
+          chart.options.scales.x.max = xMax;
+          chart.update();
+        }
+      });
+      
+      // Update the zoom slider position
+      updateZoomSlider('comparisonZoomSlider', sourceChart);
+    }
+
+    // Function to set up zoom slider
+    function setupZoomSlider(sliderId, resetBtnId, chart, customZoomFunction) {
+      const slider = document.getElementById(sliderId);
+      const resetBtn = document.getElementById(resetBtnId);
+      
+      if (!slider || !resetBtn) return;
+      
+      slider.oninput = function() {
+        const zoomPercent = parseInt(slider.value, 10);
+        
+        if (customZoomFunction) {
+          customZoomFunction(zoomPercent);
+        } else {
+          applyZoomToChart(chart, zoomPercent);
+        }
+      };
+      
+      resetBtn.onclick = function() {
+        if (Array.isArray(chart)) {
+          chart.forEach(c => resetZoom(c));
+        } else {
+          resetZoom(chart);
+        }
+        slider.value = 100;
+      };
+    }
+
+    // Apply zoom to a chart based on zoom percentage
+    function applyZoomToChart(chart, zoomPercent) {
+      if (!chart || !chart.data || !chart.data.labels || chart.data.labels.length === 0) return;
+      
+      if (zoomPercent === 100) {
+        // Reset zoom
+        chart.resetZoom();
+      } else {
+        // Get the min and max date values
+        const allDates = chart.data.labels.map(d => new Date(d));
+        const minDate = Math.min(...allDates.map(d => d.getTime()));
+        const maxDate = Math.max(...allDates.map(d => d.getTime()));
+        const range = maxDate - minDate;
+        
+        // Calculate the center of the visible range
+        const center = minDate + range / 2;
+        
+        // Calculate the new visible range based on zoom percentage
+        const newRange = (range * 100 / zoomPercent) / 2;
+        
+        // Set new min and max
+        const newMin = center - newRange;
+        const newMax = center + newRange;
+        
+        // Update chart scales
+        chart.options.scales.x.min = newMin;
+        chart.options.scales.x.max = newMax;
+        
+        // Update
+        chart.update();
+      }
+    }
+
+    // Reset zoom on a chart
+    function resetZoom(chart) {
+      if (!chart) return;
+      chart.resetZoom();
+    }
+
+    // Update zoom slider position based on chart zoom state
+    function updateZoomSlider(sliderId, chart) {
+      const slider = document.getElementById(sliderId);
+      if (!slider || !chart || !chart.scales || !chart.scales.x) return;
+      
+      const xScale = chart.scales.x;
+      if (!xScale.options.min && !xScale.options.max) {
+        // Chart is at default zoom
+        slider.value = 100;
+        return;
+      }
+      
+      // Try to calculate zoom level
+      try {
+        const allDates = chart.data.labels.map(d => new Date(d));
+        const fullRange = Math.max(...allDates.map(d => d.getTime())) - 
+                         Math.min(...allDates.map(d => d.getTime()));
+        
+        const visibleRange = xScale.max - xScale.min;
+        
+        // Calculate zoom percentage (100% means full view, 200% means zoomed in to half the range)
+        const zoomPercent = Math.min(300, Math.max(100, Math.round((fullRange / visibleRange) * 100)));
+        
+        slider.value = zoomPercent;
+      } catch (e) {
+        console.error('Error updating zoom slider:', e);
+      }
+    }
+
+
+// Add an event listener to the region dropdown to modify crop checkbox availability
+document.getElementById('compareRegion').addEventListener('change', function() {
+  const region = this.value;
+  
+  // Get all crop checkboxes
+  const maizeCheckbox = document.getElementById('compareMaize');
+  const cottonByProduct1Checkbox = document.getElementById('compareCottonByProduct1');
+  const cottonByProduct2Checkbox = document.getElementById('compareCottonByProduct2');
+  const sugarCheckbox = document.getElementById('compareSugar');
+  const wheatCheckbox = document.getElementById('compareWheat');
+  
+  // Reset all checkboxes to be clickable (enabled) and unchecked
+  maizeCheckbox.disabled = false;
+  cottonByProduct1Checkbox.disabled = false;
+  cottonByProduct2Checkbox.disabled = false;
+  sugarCheckbox.disabled = false;
+  wheatCheckbox.disabled = false;
+  
+  maizeCheckbox.checked = false;
+  cottonByProduct1Checkbox.checked = false;
+  cottonByProduct2Checkbox.checked = false;
+  sugarCheckbox.checked = false;
+  wheatCheckbox.checked = false;
+  
+  // Apply region-specific restrictions
+  if (region === 'KPK') {
+    // When KPK is chosen, wheat, cotton and maize checkboxes should be unclickable
+    wheatCheckbox.disabled = true;
+    cottonByProduct1Checkbox.disabled = true;
+    cottonByProduct2Checkbox.disabled = true;
+    maizeCheckbox.disabled = true;
+  } 
+  else if (region === 'Balochistan') {
+    // When Balochistan is chosen, maize and sugar checkboxes should be unclickable
+    maizeCheckbox.disabled = true;
+    sugarCheckbox.disabled = true;
+  }
+  else if(region =='Sindh'){
+    maizeCheckbox.disabled = true;
+  }
+  // For Punjab and Sindh, all crops are already enabled (default state)
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const pretty = s => s.replace(/_/g,' ')
+                       .split(' ')
+                       .map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase())
+                       .join(' ');
+
+  function reset(cont, sel, label) {
+    cont.style.display = 'none';
+    sel.disabled = true;
+    sel.innerHTML = `<option value="">${label}</option>`;
+  }
+
+  // grab controls
+  const cropEl   = document.getElementById('fwCrop');
+  const bpCont   = document.getElementById('fwByProductContainer');
+  const bpEl     = document.getElementById('fwByProduct');
+  const provCont = document.getElementById('fwProvinceContainer');
+  const provEl   = document.getElementById('fwProvince');
+  const statCont = document.getElementById('fwStationContainer');
+  const statEl   = document.getElementById('fwStation');
+  const statLbl  = statCont.querySelector('label');
+  const btn      = document.getElementById('showStationForecast');
+
+  // initial
+  reset(bpCont, bpEl, 'Select By-Product');
+  reset(provCont, provEl, 'Select Province');
+  reset(statCont, statEl, 'Select Station');
+  btn.disabled = true;
+
+  cropEl.addEventListener('change', () => {
+    const crop = cropEl.value;
+    reset(bpCont, bpEl, 'Select By-Product');
+    reset(provCont, provEl, 'Select Province');
+    reset(statCont, statEl, 'Select Station');
+    btn.disabled = true;
+    if (!crop) return;
+
+    // load provinces
+    fetch(`/list_provinces?crop=${crop}`)
+      .then(r=>r.ok? r.json(): Promise.reject())
+      .then(list => {
+        if (!list.length) return;
+        provCont.style.display = 'block';
+        provEl.disabled = false;
+        provEl.innerHTML = '<option value="">Select Province</option>';
+        list.forEach(p => provEl.append(new Option(pretty(p), p)));
+      })
+      .catch(console.error);
+
+    // load by-products if >1
+    fetch(`/list_by_products?crop=${crop}`)
+      .then(r=>r.ok? r.json(): Promise.reject())
+      .then(list => {
+        if (list.length > 1) {
+          bpCont.style.display = 'block';
+          bpEl.disabled = false;
+          bpEl.innerHTML = '<option value="">Select By-Product</option>';
+          list.forEach(b => bpEl.append(new Option(pretty(b), b)));
+        }
+      })
+      .catch(console.error);
+  });
+
+  function loadStatOrDist() {
+    const crop = cropEl.value, prov = provEl.value, bp = bpEl.value;
+    reset(statCont, statEl, 'Select Station');
+    btn.disabled = true;
+    if (!crop || !prov) return;
+
+    const isMaize = crop === 'Maize';
+    const url = isMaize
+      ? `/list_districts?crop=${crop}&province=${prov}`
+      : `/list_stations?crop=${crop}&province=${prov}${bp?'&by_product='+bp:''}`;
+
+    statLbl.textContent = isMaize ? 'Select District' : 'Select Station';
+
+    fetch(url)
+      .then(r=>r.ok? r.json(): Promise.reject())
+      .then(list => {
+        if (!list.length) return;
+        statCont.style.display = 'block';
+        statEl.disabled = false;
+        statEl.innerHTML = `<option value="">Select ${isMaize?'District':'Station'}</option>`;
+        list.forEach(s => statEl.append(new Option(pretty(s), s)));
+      })
+      .catch(console.error);
+  }
+  provEl.addEventListener('change', loadStatOrDist);
+  bpEl.addEventListener('change', loadStatOrDist);
+
+  statEl.addEventListener('change', () => {
+    btn.disabled = !statEl.value;
+  });
+
+  btn.addEventListener('click', () => {
+    const crop    = cropEl.value;
+    const prov    = provEl.value;
+    const bp      = bpEl.value;
+    const sel     = statEl.value;
+    if (!crop || !prov || !sel) {
+      return alert('Please complete all selections.');
+    }
+
+    const isMaize  = crop === 'Maize';
+    const endpoint = isMaize ? 'get_district_trend' : 'get_station_trend';
+    const qs       = new URLSearchParams({
+      crop:     crop.toLowerCase(),
+      province: prov,
+      [isMaize ? 'district' : 'station']: sel
+    });
+    if (bp && !isMaize) qs.set('by_product', bp);
+
+    fetch(`/${endpoint}?${qs}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+      .then(data => {
+        const dates     = data.map(d=>d.date),
+              actual    = data.map(d=> d.type==='actual'    ? d.price : null),
+              predicted = data.map(d=> d.type==='predicted' ? d.price : null),
+              canvas    = document.getElementById('stationForecastChart');
+
+        // destroy existing chart on that canvas
+        const existing = Chart.getChart(canvas.id);
+        if (existing) existing.destroy();
+
+        const chart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [
+              {
+                label: 'Historical',
+                data: actual,
+                borderColor:'#27ae60',
+                borderWidth:1,
+                pointRadius:0,
+                tension:0.1
+                
+              },
+              {
+                label: 'Price Forecast',
+                data: predicted,
+                fill: true,
+                borderColor:'#2ecc71',
+                borderWidth:1,
+                pointRadius:0,
+                tension:0.1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode:'index', intersect:false },
+            plugins: {
+              tooltip: {
+                mode:'index',
+                intersect:false,
+                callbacks: {
+                  label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
+                }
+              },
+              legend: { labels:{ usePointStyle:true } },
+              zoom: {
+                pan:  { enabled:true, mode:'x' },
+                zoom: {
+                  wheel: { enabled:true },
+                  pinch: { enabled:true },
+                  mode: 'x',
+                  onZoomComplete: function() {
+                    updateZoomSlider('zoomSlider', chart);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'month',
+                  displayFormats: { month: 'MMM yyyy' },
+                  tooltipFormat: 'yyyy-MM-dd'
+                },
+                title: { display:true, text:'Date' }
+              },
+              y: {
+                title: { display:true, text:'Price' }
+              }
+            }
+          }
+        });
+        
+        // Set up the zoom slider for Station-wise chart
+        setupZoomSlider('zoomSlider', 'resetZoomStation', chart);
+      })
+      .catch(err => alert('Error loading forecast: '+err));
+  });
+});
+
+  </script>
+  
+</body>
+<script>
+  // Load and parse the CSV
+  Papa.parse("predicted_station_data/sugar-final.csv", {
+    download: true,
+    header: true,
+    complete: function(results) {
+      const parsedData = results.data;
+
+      const labels = [];
+      const dataPoints = [];
+
+      parsedData.forEach(row => {
+        const date = row.Date || row.date;  // Adjust based on your CSV column name
+        const value = parseFloat(row.Price || row.price);  // Adjust based on your CSV column name
+
+        if (date && !isNaN(value)) {
+          labels.push(date);
+          dataPoints.push({ x: date, y: value });
+        }
+      });
+
+      // Create chart
+      const ctx = document.getElementById('stationForecastChart').getContext('2d');
+      window.stationForecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Forecasted Price',
+            data: dataPoints,
+            borderColor: 'green',
+            borderWidth: 2,
+            tension: 0.2,
+            pointRadius: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'month'
+              }
+            },
+            y: {
+              beginAtZero: false
+            }
+          },
+          plugins: {
+            zoom: {
+              pan: { 
+                enabled: true, 
+                mode: 'x'
+              },
+              zoom: {
+                wheel: { 
+                  enabled: true 
+                },
+                pinch: { 
+                  enabled: true 
+                },
+                mode: 'x'
+              }
+            }
+          }
+        }
+      });
+
+      // Set up zoom slider for the initial chart
+      setupZoomSlider('zoomSlider', 'resetZoomStation', window.stationForecastChart);
+    }
+  });
+</script>
+
+</html>

@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agriverse | External Factors</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #f8f9fa;
+            --accent-color: #3498db;
+            --background-color: #f5f6fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+            --top-bar-height: 45px;
+          }
+          
+          body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-size: 0.85rem;
+          }
+          
+          /* ====== TOP PANEL ====== */
+          .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--top-bar-height);
+            background: var(--card-background);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+          }
+          /* Top bar right section */
+          .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            text-decoration: none;
+          }
+          
+          .logo i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+          }
+          
+          .logo h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+          }
+          
+          .search-container {
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+            margin: 0 1rem;
+          }
+          
+          .search-container input {
+            width: 100%;
+            padding: 0.3rem 1rem 0.3rem 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            transition: var(--transition);
+          }
+          
+          .search-container i {
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+          }
+          
+          .user-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+          
+          .notifications {
+            position: relative;
+            cursor: pointer;
+          }
+          
+          .notifications i {
+            font-size: 1rem;
+            color: var(--text-secondary);
+          }
+          
+          .notifications::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 5px;
+            height: 5px;
+            background: var(--danger-color);
+            border-radius: 50%;
+          }
+          
+          .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+          }
+          
+          .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+          }
+          
+          .user-info {
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .user-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+          }
+          
+          .user-role {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+          }
+          
+          .logout-btn {
+            padding: 0.3rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+          }
+          
+          .logout-btn:hover {
+            color: var(--danger-color);
+          }
+          
+          /* ====== SIDEBAR ====== */
+          .sidebar {
+            position: fixed;
+            top: var(--top-bar-height);
+            left: 0;
+            height: calc(100% - var(--top-bar-height));
+            width: 180px;
+            background: var(--secondary-color);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            z-index: 900;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.03);
+          }
+          
+          .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+          }
+          
+          .nav-item {
+            margin-bottom: 0.2rem;
+          }
+          
+          .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0.6rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-size: 0.8rem;
+          }
+          
+          .nav-link:hover,
+          .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+            transform: translateX(2px);
+          }
+          
+          .nav-link i {
+            font-size: 1rem;
+          }
+          
+          /* ====== MAIN CONTENT ====== */
+          .content {
+            margin-left: 180px;
+            margin-top: var(--top-bar-height);
+            padding: 0.5rem;
+            width: calc(100% - 180px);
+          }
+          
+          .page-title h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+          }
+          
+          .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .dashboard-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        .full-width-card .chart-container {
+            height: 400px;
+            background: white;
+            border: 1px solid var(--chart-grid);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+        }
+        
+          
+          .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+          }
+          
+          .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+          }
+          
+          .card-icon {
+            color: var(--primary-color);
+            font-size: 1rem;
+          }
+          
+          .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+          }
+          /* Google Translate Styling */
+      .google-translate-container {
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .google-translate-container i {
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-right: 5px;
+      }
+
+      .goog-te-gadget {
+        font-family: "Poppins", sans-serif !important;
+        color: var(--text-primary) !important;
+        font-size: 0px !important; /* Hide Google branding text */
+      }
+
+      .goog-te-gadget .goog-te-combo {
+        padding: 2px 6px;
+        height: 26px;
+        border-radius: var(--border-radius);
+        border: 1px solid #e2e8f0;
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        background-color: white;
+        cursor: pointer;
+        outline: none;
+        font-family: "Poppins", sans-serif;
+        transition: var(--transition);
+      }
+
+      .goog-te-gadget .goog-te-combo:hover {
+        border-color: var(--primary-color);
+      }
+
+      .goog-te-gadget .goog-te-combo:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      }
+
+      /* Hide Google branding */
+      .goog-logo-link,
+      .goog-te-gadget span {
+        display: none !important;
+      }
+
+      .goog-te-banner-frame {
+        display: none !important;
+      }
+
+      .goog-te-menu-value {
+        color: var(--text-primary) !important;
+        text-decoration: none !important;
+      }
+
+          
+          /* Previous styles remain unchanged */
+        .crop-selector {
+            width: 200px;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border: 1px solid var(--chart-grid);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+          @media (max-width: 1024px) {
+            .sidebar {
+              width: 160px;
+            }
+            .content {
+              margin-left: 160px;
+              width: calc(100% - 160px);
+            }
+          }
+          
+          @media (max-width: 768px) {
+            .sidebar {
+              width: 50px;
+              padding: 0.6rem 0.4rem;
+            }
+            .nav-link span {
+              display: none;
+            }
+            .content {
+              margin-left: 50px;
+              width: calc(100% - 50px);
+            }
+            .logo h2 {
+              display: none;
+            }
+            .search-container {
+              max-width: 160px;
+              margin: 0 0.45rem;
+            }
+            .user-info {
+              display: none;
+            }
+            .top-bar {
+              padding: 0 0.45rem;
+            }
+            .dashboard-grid {
+              grid-template-columns: 1fr;
+            }
+
+          }
+          
+          @media (max-width: 1366px) {
+            .content {
+              padding: 0.75rem;
+            }
+            .chart-container {
+              height: 250px;
+            }
+          }/* Fix for Google Translate dropdown positioning */
+          body > .skiptranslate {
+            display: none;
+          }
+    
+          /* Remove Google Translate top bar */
+          .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+          }
+          body {
+            top: 0 !important;
+          }
+          
+          /* Year Selector Styles */
+          .year-selector-container {
+            margin-bottom: 0.8rem;
+            background-color: var(--card-background);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+          }
+          
+          .year-selector-container label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+          }
+          
+          #yearSelector {
+            width: 200px;
+            padding: 0.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            background-color: white;
+            cursor: pointer;
+            transition: var(--transition);
+          }
+          
+          #yearSelector:hover, #yearSelector:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+          }
+        </style>
+        <!-- Google Translate Script -->
+        <script type="text/javascript">
+          function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+              {
+                pageLanguage: "en",
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false,
+              },
+              "google_translate_element"
+            );
+          }
+        </script>
+        <script
+          type="text/javascript"
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+        ></script>
+   
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Chart.js Zoom Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+
+</head>
+<body>
+
+    <!-- Top Panel -->
+    <div class="top-bar">
+        <div class="logo">
+          <i class="ri-leaf-line"></i>
+          <h2>Agri<span style="color: var(--primary-color)">Verse.</span></h2>
+        </div>
+        <div class="search-container">
+          <i class="ri-search-line"></i>
+          <input type="text" placeholder="Search..." />
+        </div>
+        <div class="top-bar-right">
+          <!-- Google Translate Element -->
+          <div class="google-translate-container">
+            <i class="ri-global-line"></i>
+            <div id="google_translate_element"></div>
+          </div>
+          <span class="welcome-message">Welcome, {{ session['username'] }}!</span>
+          <div class="user-avatar">{{ session['username'][0].upper() }}</div>
+          <button class="logout-btn">
+            <i class="ri-logout-box-r-line"></i>
+          </button>
+        </div>
+      </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link">
+                    <i class="ri-dashboard-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/newsletter" class="nav-link">
+                    <i class="ri-newspaper-line"></i>
+                    <span>Newsletter</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/chatbot" class="nav-link">
+                    <i class="ri-robot-line"></i>
+                    <span>AgriBot</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/external" class="nav-link active">
+                    <i class="ri-line-chart-line"></i>
+                    <span>External Trends</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/faqs" class="nav-link">
+                    <i class="ri-home-smile-line"></i>
+                    <span>FAQs</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="page-title">
+                <h1>External Factors Dashboard</h1>
+                <p>Monitor market factors affecting agricultural commodities</p>
+            </div>
+            <div class="last-updated text-muted">
+                Last updated: <span id="lastUpdated">{{ last_updated }}</span>
+            </div>
+        </div>
+
+        
+        
+        <!-- MOVED: Year Selection Dropdown - Now right above the production charts -->
+        <div class="year-selector-container">
+            <label for="yearSelector">Select Production Year:</label>
+            <select id="yearSelector" class="form-select" onchange="updatePieCharts(this.value)">
+                {% for year in years %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Wheat Production Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Wheat Production Distribution</h3>
+                    <i class="ri-plant-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="wheatChart"></canvas>
+                </div>
+            </div>
+        
+            <!-- Cotton Production Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Cotton Production Distribution</h3>
+                    <i class="ri-plant-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="cottonChart"></canvas>
+                </div>
+            </div>
+        
+            <!-- Sugar Production Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Sugar Production Distribution</h3>
+                    <i class="ri-plant-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="sugarChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Maize Production Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Maize Production Distribution</h3>
+                    <i class="ri-plant-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="maizeChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- rainfal with price 
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Rainfall and Crop Price Correlation</h3>
+                    <i class="ri-drop-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="rainfallChart"></canvas>
+                </div>
+            </div>
+           
+            - export vs price  Card -
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Export Trends vs. Price</h3>
+                    <i class="ri-line-chart-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="exportTrendsChart"></canvas>
+                </div>
+            </div> -->
+            <!-- USD Exchange Rate Card - Full width and first -->
+          <div class="dashboard-card full-width-card">
+            <div class="card-header">
+                <h3 class="card-title">USD/PKR Exchange Rate Historical</h3>
+                <i class="ri-exchange-dollar-line card-icon"></i>
+            </div>
+            <div class="chart-container">
+                <canvas id="usdChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Crude Oil Price Card -->
+        <div class="dashboard-card full-width-card">
+            <div class="card-header">
+                <h3 class="card-title">Crude Oil Price Trends</h3>
+                <i class="ri-oil-line card-icon"></i>
+            </div>
+            <div class="chart-container">
+                <canvas id="crudeOilChart"></canvas>
+            </div>
+        </div>
+
+            <!-- Petrol Price Card -->
+            <div class="dashboard-card full-width-card">
+                <div class="card-header">
+                    <h3 class="card-title">Petrol Price Trends</h3>
+                    <i class="ri-gas-station-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="petrolChart"></canvas>
+                </div>
+            </div>
+        
+              <!-- Add the new Inflation Rate Card right after the USD Exchange Rate Card -->
+            <div class="dashboard-card full-width-card">
+                <div class="card-header">
+                    <h3 class="card-title">Pakistan Inflation Rate Trends</h3>
+                    <i class="ri-line-chart-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="inflationRateChart"></canvas>
+                </div>
+            </div>
+            
+             <!-- Inflation Rate Card -->       
+            <!-- Temperature Heatmap Card 
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">Pakistan Temperature Heatmap</h3>
+                    <i class="ri-temp-hot-line card-icon"></i>
+                </div>
+                <div class="chart-container">
+                    <iframe src="/static/heatmap.html" width="100%" height="450px" style="border:none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"></iframe>
+                </div>
+            </div>-->
+        </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          // Chart objects - Declare globally for access in updatePieCharts function
+          let wheatChart, cottonChart, sugarChart, maizeChart;
+          
+          // Function to create a pie chart
+          function createPieChart(ctx, data, title) {
+              return new Chart(ctx, {
+                  type: 'pie',
+                  data: {
+                      labels: ['Punjab', 'Sindh', 'KPK', 'Balochistan'],
+                      datasets: [{
+                          data: data,
+                          backgroundColor: [
+                              '#2ecc71',
+                              '#3498db',
+                              '#e74c3c',
+                              '#f1c40f'
+                          ]
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                          legend: {
+                              position: 'bottom'
+                          },
+                          title: {
+                              display: true,
+                              text: title
+                          }
+                      }
+                  }
+              });
+          }
+          
+          // Initialize pie charts with initial data
+          const wheatCtx = document.getElementById('wheatChart');
+          if (wheatCtx) {
+              wheatChart = createPieChart(
+                  wheatCtx.getContext('2d'),
+                  JSON.parse('{{ initial_wheat_data | safe }}'),
+                  'Wheat Production Distribution (in tonnes)'
+              );
+          }
+          
+          const cottonCtx = document.getElementById('cottonChart');
+          if (cottonCtx) {
+              cottonChart = createPieChart(
+                  cottonCtx.getContext('2d'),
+                  JSON.parse('{{ initial_cotton_data | safe }}'),
+                  'Cotton Production Distribution (in tonnes)'
+              );
+          }
+          
+          const sugarCtx = document.getElementById('sugarChart');
+          if (sugarCtx) {
+              sugarChart = createPieChart(
+                  sugarCtx.getContext('2d'),
+                  JSON.parse('{{ initial_sugar_data | safe }}'),
+                  'Sugar Production Distribution (in tonnes)'
+              );
+          }
+          
+          const maizeCtx = document.getElementById('maizeChart');
+          if (maizeCtx) {
+              maizeChart = createPieChart(
+                  maizeCtx.getContext('2d'),
+                  JSON.parse('{{ initial_maize_data | safe }}'),
+                  'Maize Production Distribution (in tonnes)'
+              );
+          }
+          
+          // Initialize petrol price chart
+          const petrolCtx = document.getElementById('petrolChart');
+          if (petrolCtx) {
+              new Chart(petrolCtx.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: JSON.parse('{{ petrol_dates | safe }}'),
+                      datasets: [{
+                          label: 'Petrol Price (PKR)',
+                          data: JSON.parse('{{ petrol_prices | safe }}'),
+                          borderColor: '#2ecc71',
+                          tension: 0.4,
+                          fill: false
+                          
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                          legend: {
+                              display: true,
+                              position: 'bottom'
+                          }
+                      },
+                      zoom: {
+                              limits: {
+                                  x: {min: 'original', max: 'original', minRange: 10}
+                              },
+                              pan: {
+                                  enabled: true,
+                                  mode: 'x',
+                                  modifierKey: 'ctrl'
+                              },
+                              zoom: {
+                                  wheel: {
+                                      enabled: true,
+                                      modifierKey: 'ctrl'
+                                  },
+                                  pinch: {
+                                      enabled: true
+                                  },
+                                  mode: 'x',
+                                  drag: {
+                                      enabled: true,
+                                      backgroundColor: 'rgba(0,0,0,0.1)'
+                                  }
+                              }
+                          },
+                      scales: {
+                          y: {
+                              beginAtZero: false,
+                              grid: {
+                                  color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return 'PKR ' + value;
+                                  }
+                              }
+                          },
+                          x: {
+                              grid: {
+                                  display: false
+                              }
+                          }
+                      }
+                  }
+              });
+          }
+      
+          // Initialize USD exchange rate chart
+          const usdCtx = document.getElementById('usdChart');
+          if (usdCtx) {
+              new Chart(usdCtx.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: JSON.parse('{{ usd_dates | safe }}'),
+                      datasets: [{
+                          label: 'USD/PKR',
+                          data: JSON.parse('{{ usd_prices | safe }}'),
+                          borderColor: '#3498db',
+                          backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                          borderWidth: 1,
+                          tension: 0.1,
+                          fill: true,
+                          pointRadius: 0,
+                          pointHitRadius: 5
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      interaction: {
+                          mode: 'index',
+                          intersect: false,
+                      },
+                      plugins: {
+                          legend: {
+                              display: false
+                          },
+                          tooltip: {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                              titleColor: '#333',
+                              bodyColor: '#666',
+                              borderColor: '#ddd',
+                              borderWidth: 1,
+                              padding: 10,
+                              displayColors: false,
+                              callbacks: {
+                                  label: function(context) {
+                                      return 'PKR ' + context.parsed.y.toFixed(2);
+                                  }
+                              }
+                          },
+                          zoom: {
+                              limits: {
+                                  x: {min: 'original', max: 'original', minRange: 10}
+                              },
+                              pan: {
+                                  enabled: true,
+                                  mode: 'x',
+                                  modifierKey: 'ctrl'
+                              },
+                              zoom: {
+                                  wheel: {
+                                      enabled: true,
+                                      modifierKey: 'ctrl'
+                                  },
+                                  pinch: {
+                                      enabled: true
+                                  },
+                                  mode: 'x',
+                                  drag: {
+                                      enabled: true,
+                                      backgroundColor: 'rgba(0,0,0,0.1)'
+                                  }
+                              }
+                          }
+                      },
+                      scales: {
+                          y: {
+                              position: 'right',
+                              grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return 'PKR ' + value;
+                                  }
+                              }
+                          },
+                          x: {
+                              grid: {
+                                  display: false
+                              },
+                              ticks: {
+                                  maxRotation: 45,
+                                  minRotation: 45,
+                                  autoSkip: true,
+                                  maxTicksLimit: 10
+                              }
+                          }
+                      }
+                  }
+              });
+          }
+
+          // Initialize crude oil price chart
+          const crudeOilCtx = document.getElementById('crudeOilChart');
+          if (crudeOilCtx) {
+              new Chart(crudeOilCtx.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: JSON.parse('{{ crude_dates | safe }}'),
+                      datasets: [{
+                          label: 'Crude Oil Price (USD)',
+                          data: JSON.parse('{{ crude_prices | safe }}'),
+                          borderColor: '#e67e22',
+                          backgroundColor: 'rgba(230, 126, 34, 0.2)',
+                          borderWidth: 1,
+                          tension: 0.1,
+                          fill: true,
+                          pointRadius: 0,
+                          pointHitRadius: 5
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      interaction: {
+                          mode: 'index',
+                          intersect: false,
+                      },
+                      plugins: {
+                          legend: {
+                              display: false
+                          },
+                          tooltip: {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                              titleColor: '#333',
+                              bodyColor: '#666',
+                              borderColor: '#ddd',
+                              borderWidth: 1,
+                              padding: 10,
+                              displayColors: false,
+                              callbacks: {
+                                  label: function(context) {
+                                      return 'USD ' + context.parsed.y.toFixed(2);
+                                  }
+                              }
+                          },
+                          zoom: {
+                              limits: {
+                                  x: {min: 'original', max: 'original', minRange: 10}
+                              },
+                              pan: {
+                                  enabled: true,
+                                  mode: 'x',
+                                  modifierKey: 'ctrl'
+                              },
+                              zoom: {
+                                  wheel: {
+                                      enabled: true,
+                                      modifierKey: 'ctrl'
+                                  },
+                                  pinch: {
+                                      enabled: true
+                                  },
+                                  mode: 'x',
+                                  drag: {
+                                      enabled: true,
+                                      backgroundColor: 'rgba(0,0,0,0.1)'
+                                  }
+                              }
+                          }
+                      },
+                      scales: {
+                          y: {
+                              position: 'right',
+                              grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return 'USD ' + value;
+                                  }
+                              }
+                          },
+                          x: {
+                              grid: {
+                                  display: false
+                              },
+                              ticks: {
+                                  maxRotation: 45,
+                                  minRotation: 45,
+                                  autoSkip: true,
+                                  maxTicksLimit: 10
+                              }
+                          }
+                      }
+                  }
+              });
+          }
+      
+          // Initialize inflation rate chart
+          const inflationRateCtx = document.getElementById('inflationRateChart');
+          if (inflationRateCtx) {
+              new Chart(inflationRateCtx.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: JSON.parse('{{ infla_dates | safe }}'),
+                      datasets: [{
+                          label: 'Inflation Rate (%)',
+                          data: JSON.parse('{{ infla_prices | safe }}'),
+                          borderColor: '#e74c3c',
+                          backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                          borderWidth: 2,
+                          tension: 0.4,
+                          fill: true,
+                          pointRadius: 4,
+                          pointBackgroundColor: '#e74c3c',
+                          pointBorderColor: '#fff',
+                          pointBorderWidth: 2
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                          legend: {
+                              display: true,
+                              position: 'bottom'
+                          },
+                          tooltip: {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                              titleColor: '#2c3e50',
+                              bodyColor: '#7f8c8d',
+                              borderColor: '#e2e8f0',
+                              borderWidth: 1,
+                              padding: 10,
+                              displayColors: false,
+                              callbacks: {
+                                  label: function(context) {
+                                      return `Inflation: ${context.parsed.y}%`;
+                                  }
+                              }
+                          }
+                      },
+                      zoom: {
+                              limits: {
+                                  x: {min: 'original', max: 'original', minRange: 10}
+                              },
+                              pan: {
+                                  enabled: true,
+                                  mode: 'x',
+                                  modifierKey: 'ctrl'
+                              },
+                              zoom: {
+                                  wheel: {
+                                      enabled: true,
+                                      modifierKey: 'ctrl'
+                                  },
+                                  pinch: {
+                                      enabled: true
+                                  },
+                                  mode: 'x',
+                                  drag: {
+                                      enabled: true,
+                                      backgroundColor: 'rgba(0,0,0,0.1)'
+                                  }
+                              }
+                          },
+                      scales: {
+                          y: {
+                              beginAtZero: false,
+                              grid: {
+                                  color: 'rgba(0, 0, 0, 0.05)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return value + '%';
+                                  }
+                              }
+                          },
+                          x: {
+                              grid: {
+                                  display: false
+                              }
+                          }
+                      }
+                  }
+              });
+          }
+      
+          // Function to update the pie charts with new data for the selected year
+          function updatePieCharts(year) {
+              fetch(`/get_crop_production_data/${year}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      // Destroy existing charts
+                      wheatChart.destroy();
+                      cottonChart.destroy();
+                      sugarChart.destroy();
+                      maizeChart.destroy();
+                      
+                      // Create new charts with updated data
+                      wheatChart = createPieChart(
+                          document.getElementById('wheatChart').getContext('2d'),
+                          [data.wheat.Punjab, data.wheat.Sindh, data.wheat.KPK, data.wheat.Balochistan],
+                          'Wheat Production Distribution (in tonnes)'
+                      );
+                      
+                      cottonChart = createPieChart(
+                          document.getElementById('cottonChart').getContext('2d'),
+                          [data.cotton.Punjab, data.cotton.Sindh, data.cotton.KPK, data.cotton.Balochistan],
+                          'Cotton Production Distribution (in tonnes)'
+                      );
+                      
+                      sugarChart = createPieChart(
+                          document.getElementById('sugarChart').getContext('2d'),
+                          [data.sugar.Punjab, data.sugar.Sindh, data.sugar.KPK, data.sugar.Balochistan],
+                          'Sugar Production Distribution (in tonnes)'
+                      );
+                      
+                      maizeChart = createPieChart(
+                          document.getElementById('maizeChart').getContext('2d'),
+                          [data.maize.Punjab, data.maize.Sindh, data.maize.KPK, data.maize.Balochistan],
+                          'Maize Production Distribution (in tonnes)'
+                      );
+                      
+                      document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                  })
+                  .catch(error => {
+                      console.error('Error updating charts:', error);
+                      alert('Failed to update charts: ' + error.message);
+                  });
+          }
+      
+          // Set up year selector event listener
+          const yearSelector = document.getElementById('yearSelector');
+          if (yearSelector) {
+              yearSelector.addEventListener('change', function() {
+                  updatePieCharts(this.value);
+              });
+          }
+      });
+
+      document
+        .querySelector(".logout-btn")
+        .addEventListener("click", function (event) {
+          event.preventDefault(); // Prevent any default behavior
+
+          // Show a confirmation dialog
+          const confirmLogout = confirm("Are you sure you want to logout?");
+
+          // If the user confirms, redirect to the logout route
+          if (confirmLogout) {
+            window.location.href = "{{ url_for('logout') }}"; // Use Flask's url_for to generate the logout URL
+          }
+        });
+      </script>
+    </script>
+    </body>
+</html>

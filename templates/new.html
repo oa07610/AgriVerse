@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agriverse | Analytics</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Leaflet.js for the map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      color: #343a40;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Sidebar Style */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 200px;
+      background-color: #343a40;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .sidebar h2 {
+      color: white;
+      font-weight: bold;
+      font-size: 1.2em;
+      text-decoration: none;
+      margin: 15px 0;
+    }
+
+    .sidebar a {
+      color: #ffffff;
+      font-size: 0.8em;
+      margin: 15px 0;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .sidebar a:hover {
+      color: #4caf50;
+    }
+
+    /* Content Styling */
+    .content {
+      margin-left: 220px;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .page-title {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      font-family: 'Poppins', sans-serif;
+      color: #343a40;
+    }
+
+    .section-title {
+      font-size: 1.0em;
+      font-weight: bold;
+      margin-top: 40px;
+      color: #343a40;
+    }
+
+    .graphs {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .graph-container {
+      width: 48%;
+    }
+
+    /* Insights Section */
+    .insights {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+
+    .insight-card {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 23%;
+    }
+
+    .insight-card h5 {
+      font-size: 1.0em;
+      color: #4caf50;
+    }
+
+    .insight-card p {
+      font-size: 0.8em;
+    }
+
+    /* Dummy Heatmap */
+    .heatmap {
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      width: 100%;
+      height: 150px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2 href="/">Agri<span style="color:#388e3c;">Verse</span>.</h2>
+    <a href="/analytics">Analytics</a>
+    <a href="/discover">Discover</a>
+    <a href="/sales">Sales</a>
+    <a href="/automotive">Automotive</a>
+    <a href="/smart-home">Smart Home</a>
+  </div>
+
+  <div class="content">
+    <!-- Page Title -->
+    <div class="page-title">Analytics</div>
+    <p>Check the sales, value, and bounce rate by country.</p>
+
+    <!-- Graphs Section -->
+    <div class="graphs">
+      <div class="graph-container">
+        <h3>Commodity Price Predictions</h3>
+        <!-- Crop Dropdown -->
+        <div class="col-md-6">
+          <label for="crop" class="form-label">Crop</label>
+          <select id="crop" name="crop" class="form-select">
+            <option value="">Select Crop</option>
+            <option value="Sugar">Sugar</option>
+            <option value="Maize">Maize</option>
+            <option value="Cotton">Cotton</option>
+          </select>
+        </div>
+
+        <!-- By Product Dropdown (Initially Hidden) -->
+        <div class="col-md-6" id="byProductContainer" style="display: none;">
+          <label for="byProduct" class="form-label">By Product</label>
+          <select id="byProduct" name="byProduct" class="form-select">
+            <option value="">Select By Product</option>
+            <option value="1">By Product 1</option>
+            <option value="2">By Product 2</option>
+          </select>
+        </div>
+
+        <!-- Regions -->
+        <div class="col-md-6">
+          <label class="form-label">Regions</label>
+          <div class="d-flex justify-content-between">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="Punjab" id="regionPunjab">
+              <label class="form-check-label" for="regionPunjab">Punjab</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="Sindh" id="regionSindh">
+              <label class="form-check-label" for="regionSindh">Sindh</label>
+            </div>
+            <div class="form-check" id="regionKPKContainer">
+              <input class="form-check-input" type="checkbox" value="KPK" id="regionKPK">
+              <label class="form-check-label" for="regionKPK">KPK</label>
+            </div>
+            <div class="form-check" id="regionBalochistanContainer" style="display: none;">
+              <input class="form-check-input" type="checkbox" value="Balochistan" id="regionBalochistan">
+              <label class="form-check-label" for="regionBalochistan">Balochistan</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Show Graph Button -->
+        <div class="col-md-4 d-flex align-items-end">
+          <button type="button" id="showGraph" class="btn btn-custom w-100">Show Graph</button>
+        </div>
+
+        <div class="chart-container" style="display: none;" id="chartContainer">
+          <canvas id="sugarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="section-title">Key Insights</div>
+    <div class="insights">
+      <div class="insight-card">
+        <h5>Bookings</h5>
+        <p>281</p>
+        <p>+55% than last week</p>
+      </div>
+      <div class="insight-card">
+        <h5>Today's Users</h5>
+        <p>2,300</p>
+        <p>+3% than last month</p>
+      </div>
+      <div class="insight-card">
+        <h5>Revenue</h5>
+        <p>$34,000</p>
+        <p>+35% than last month</p>
+      </div>
+      <div class="insight-card">
+        <h5>Followers</h5>
+        <p>+2,910</p>
+        <p>Just updated</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('crop').addEventListener('change', function() {
+        const crop = this.value;
+        const byProductContainer = document.getElementById('byProductContainer');
+        const regionBalochistanContainer = document.getElementById('regionBalochistanContainer');
+        const regionKPKContainer = document.getElementById('regionKPKContainer');
+
+        // Show/Hide "By Product" and regions based on selected crop
+        if (crop === 'Cotton') {
+            byProductContainer.style.display = 'block';
+            regionBalochistanContainer.style.display = 'block';
+            regionKPKContainer.style.display = 'none';
+            document.getElementById('regionKPK').checked = false; // Uncheck KPK
+        } else {
+            byProductContainer.style.display = 'none';
+            regionBalochistanContainer.style.display = 'none';
+            regionKPKContainer.style.display = 'block';
+            document.getElementById('byProduct').value = ''; // Reset By Product value
+            document.getElementById('regionBalochistan').checked = false; // Uncheck Balochistan
+        }
+    });
+
+    document.getElementById('showGraph').addEventListener('click', function() {
+        const chartContainer = document.getElementById('chartContainer');
+        const crop = document.getElementById('crop').value;
+        const byProduct = document.getElementById('byProduct').value;
+
+        const regions = [];
+        if (document.getElementById('regionPunjab').checked) regions.push('Punjab');
+        if (document.getElementById('regionSindh').checked) regions.push('Sindh');
+        if (document.getElementById('regionKPK').checked) regions.push('KPK');
+        if (document.getElementById('regionBalochistan').checked) regions.push('Balochistan');
+
+        if (!crop || (!byProduct && crop === 'Cotton') || regions.length === 0) {
+            alert('Please select the required fields.');
+            return;
+        }
+
+        fetch(`/get_sugar_data?crop=${crop}&regions=${regions.join(',')}&by_product=${byProduct}`)
+            .then(response => response.json())
+            .then(data => {
+                chartContainer.style.display = 'block';
+                const ctx = document.getElementById('sugarChart').getContext('2d');
+
+                // Destroy existing chart
+                if (typeof window.sugarChart !== 'undefined' && window.sugarChart instanceof Chart) {
+                    window.sugarChart.destroy();
+                }
+
+                const allDates = Array.from(new Set(data.flatMap(regionData => [
+                    ...regionData.dates_actual,
+                    ...regionData.dates_predicted
+                ]))).sort();
+
+                const datasets = [];
+                data.forEach(regionData => {
+                    const actualPricesMapped = allDates.map(date =>
+                        regionData.dates_actual.includes(date)
+                            ? regionData.actual_prices[regionData.dates_actual.indexOf(date)]
+                            : null
+                    );
+
+                    const predictedPricesMapped = allDates.map(date =>
+                        regionData.dates_predicted.includes(date)
+                            ? regionData.predicted_prices[regionData.dates_predicted.indexOf(date)]
+                            : null
+                    );
+
+                    datasets.push({
+                        label: `${regionData.region} Actual Prices`,
+                        data: actualPricesMapped,
+                        borderColor: regionData.color_actual.replace(/rgba\((\d+), (\d+), (\d+), [^\)]+\)/, 'rgba($1, $2, $3, 1)'),
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        borderWidth: 3,
+                    });
+
+                    datasets.push({
+                        label: `${regionData.region} Predicted Prices`,
+                        data: predictedPricesMapped,
+                        borderColor: regionData.color_predicted.replace(/rgba\((\d+), (\d+), (\d+), [^\)]+\)/, 'rgba($1, $2, $3, 1)'),
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        borderWidth: 1.5,
+                    });
+
+                    datasets.push({
+                        label: `Prediction Range`,
+                        data: predictedPricesMapped,
+                        backgroundColor: 'rgba(128, 128, 128, 0.3)',
+                        borderWidth: 0,
+                        fill: true,
+                        tension: 0.1,
+                    });
+                });
+
+                window.sugarChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: allDates,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: 'month', tooltipFormat: 'YYYY-MM-DD' },
+                                title: { display: true, text: 'Date', color: '#ffffff' },
+                                ticks: { color: '#ffffff' },
+                            },
+                            y: {
+                                title: { display: true, text: 'Price', color: '#ffffff' },
+                                ticks: { color: '#ffffff' },
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#ffffff' } },
+                            title: { display: true, text: `${crop} Price Trends`, color: '#ffffff' }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                alert('Error fetching data. Please ensure the data is available for the selected regions and by product.');
+            });
+    });
+  </script>
+</body>
+
+</html>

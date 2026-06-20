@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Agriverse</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #f8f9fa;
+            --accent-color: #3498db;
+            --background-color: #f5f6fa;
+            --card-background: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+            --top-bar-height: 45px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding-top: var(--top-bar-height);
+            font-size: 0.85rem;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--top-bar-height);
+            background: var(--card-background);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+      
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+    
+        .brand-logo i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+    
+        .brand-logo h2 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin: 0;
+        }
+    
+        .search-container {
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+            margin: 0 1rem;
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 0.3rem 1rem 0.3rem 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+    
+        .search-container input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+            outline: none;
+        }
+        .container mt-3{
+          font-size: 0.3rem;
+          margin-top: 1rem;
+        }
+        .search-container i {
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .welcome-message {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .admin-header {
+            background: var(--card-background);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 0.75rem;
+        }
+
+        .admin-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .post-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .create-post-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+        }
+
+        .create-post-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .post-meta {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 0.3rem;
+        }
+
+        .post-image {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            margin: 0.5rem 0;
+        }
+
+        .post-video {
+            width: 100%;
+            border-radius: var(--border-radius);
+            margin: 0.5rem 0;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .logout-btn {
+            padding: 0.3rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+      
+        .logout-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .card {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .card-body {
+            padding: 0.75rem;
+        }
+
+        .card-body h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-select, .form-control {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .post-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .post-card p {
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        .btn-danger {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-link span {
+                display: none;
+            }
+            .brand-logo h2 {
+                display: none;
+            }
+            .search-container {
+                max-width: 160px;
+                margin: 0 0.45rem;
+            }
+            .user-info {
+                display: none;
+            }
+            .top-bar {
+                padding: 0 0.45rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div class="top-bar">
+        <div class="brand-logo">
+            <i class="ri-leaf-line"></i>
+            <h2>Agri<span style="color: var(--primary-color)">Verse.</span></h2>
+        </div>
+        <div class="search-container">
+            <i class="ri-search-line"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="welcome-message">Welcome, {{ session['username'] }}!</span>
+            <div class="user-avatar">
+                {{ session['username'][0].upper() }}
+            </div>
+            <button class="logout-btn">
+                <i class="ri-logout-box-r-line"></i>
+            </button>
+        </div>
+    </div>
+
+    
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="admin-title">
+                    <i class="ri-dashboard-line me-2"></i>
+                    Dashboard Overview
+                </h1>
+                <a href="{{ url_for('create_post') }}" class="create-post-btn">
+                    <i class="ri-add-line"></i>
+                    Create New Post
+                </a>
+            </div>
+        </div>
+
+        
+      <!-- New Section for CSV Upload Options -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <h4>Upload CSV Data</h4>
+          <form
+            action="{{ url_for('upload_csv') }}"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <div class="mb-2">
+              <label for="crop_type" class="form-label">Select Commodity</label>
+              <select
+                id="crop_type"
+                name="crop_type"
+                class="form-select"
+                required
+              >
+                <option value="" disabled selected>Select a commodity</option>
+                <option value="wheat">Wheat</option>
+                <option value="maize">Maize</option>
+                <option value="cotton">Cotton</option>
+                <option value="sugar">Sugar</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label for="csv_file" class="form-label">Upload CSV File</label>
+              <input
+                type="file"
+                class="form-control"
+                id="csv_file"
+                name="csv_file"
+                accept=".csv"
+                required
+              />
+            </div>
+            <!-- Updated Upload CSV Button with Green Color -->
+            <button
+              type="submit"
+              class="btn"
+              style="
+                background: var(--primary-color);
+                color: white;
+                border: none;
+              "
+            >
+              Upload CSV
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- End of CSV Upload Section -->
+
+        <div class="row">
+            <div class="col-12">
+              {% for post in posts %}
+              <div class="post-card">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h3>{{ post.title }}</h3>
+                  <button class="btn btn-danger delete-post" data-post-id="{{ post.id }}">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+    
+                <div class="post-meta">
+                  <i class="ri-user-line"></i>
+                  {{ post.author.username or 'Unknown' }} &nbsp;|&nbsp;
+                  <i class="ri-time-line"></i>
+                  {{ post.created_at[:10] }} {# just YYYY-MM-DD #}
+                </div>
+    
+                <p class="mt-2">{{ post.content | safe }}</p>
+    
+                {% if post.image_url %}
+                <img
+                  src="{{ post.image_url }}"
+                  alt="Post image"
+                  class="post-image"
+                />
+                {% endif %} {% if post.video_url %}
+                <video class="post-video" controls>
+                  <source src="{{ post.video_url }}" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add an event listener to the logout button
+        document.querySelector('.logout-btn').addEventListener('click', function(event) {
+          event.preventDefault(); // Prevent any default behavior
+          
+          // Show a confirmation dialog
+          const confirmLogout = confirm('Are you sure you want to logout?');
+          
+          // If the user confirms, redirect to the logout route
+          if (confirmLogout) {
+            window.location.href = "{{ url_for('logout') }}"; // Use Flask's url_for to generate the logout URL
+          }
+        });
+
+        // Add event listeners for delete buttons
+        document.querySelectorAll('.delete-post').forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+                const postCard = this.closest('.post-card');
+                
+                // Show confirmation dialog
+                if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                    // Send delete request
+                    fetch(`/admin/delete_post/${postId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the post card from the DOM
+                            postCard.remove();
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                            alertDiv.innerHTML = `
+                                Post deleted successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            `;
+                            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.admin-header'));
+                        } else {
+                            throw new Error(data.error || 'Failed to delete post');
+                        }
+                    })
+                    .catch(error => {
+                        // Show error message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                        alertDiv.innerHTML = `
+                            ${error.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.admin-header'));
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

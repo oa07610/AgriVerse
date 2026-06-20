@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agriverse | AgriBot</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <!-- Google Translate -->
+    <meta name="google" content="notranslate" />
+    <style>
+      :root {
+        --primary-color: #2ecc71;
+        --primary-dark: #27ae60;
+        --secondary-color: #f8f9fa;
+        --accent-color: #3498db;
+        --background-color: #f5f6fa;
+        --card-background: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --success-color: #2ecc71;
+        --warning-color: #f1c40f;
+        --danger-color: #e74c3c;
+        --border-radius: 8px;
+        --box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+        --top-bar-height: 50px;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-primary);
+        display: flex;
+        min-height: 100vh;
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--top-bar-height);
+        background: var(--card-background);
+        padding: 0 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        z-index: 1000;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .logo i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+      }
+
+      .logo h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .search-container {
+        flex: 1;
+        max-width: 300px;
+        position: relative;
+        margin: 0 1rem;
+      }
+
+      .search-container input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--border-radius);
+        font-size: 0.85rem;
+        transition: var(--transition);
+      }
+
+      .search-container input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+        outline: none;
+      }
+
+      .search-container i {
+        position: absolute;
+        left: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: var(--top-bar-height);
+        left: 0;
+        height: calc(100% - var(--top-bar-height));
+        width: 200px;
+        background: var(--secondary-color);
+        color: var(--text-primary);
+        padding: 1rem;
+        z-index: 900;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .content {
+        margin-left: 200px;
+        margin-top: var(--top-bar-height);
+        padding: 1.25rem;
+        width: calc(100% - 200px);
+      }
+
+      .user-section {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .notifications {
+        position: relative;
+        cursor: pointer;
+      }
+
+      .notifications i {
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .notifications::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 5px;
+        height: 5px;
+        background: var(--danger-color);
+        border-radius: 50%;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--text-primary);
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+      }
+
+      .logout-btn {
+        padding: 0.3rem;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .logout-btn:hover {
+        color: var(--danger-color);
+      }
+
+      .nav-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-item {
+        margin-bottom: 0.2rem;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        font-size: 0.85rem;
+      }
+
+      .nav-link:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateX(2px);
+      }
+
+      .nav-link.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .nav-link i {
+        font-size: 1rem;
+      }
+
+      /* Chat specific styles */
+      .chat-container {
+        background: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin: 0;
+        height: calc(100vh - var(--top-bar-height) - 1.5rem);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .chat-header i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+      }
+
+      .chat-header h2 {
+        font-size: 1.1rem;
+        margin: 0;
+      }
+
+      .chat-header p {
+        font-size: 0.85rem;
+        margin: 0;
+      }
+
+      .language-select {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid #eee;
+        outline: none;
+        transition: var(--transition);
+        margin-left: auto;
+      }
+
+      .language-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      }
+
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.75rem;
+      }
+
+      .message {
+        margin-bottom: 0.6rem;
+        max-width: 70%;
+      }
+
+      .message.user {
+        margin-left: auto;
+      }
+
+      .message-content {
+        padding: 0.8rem;
+        border-radius: var(--border-radius);
+        position: relative;
+        font-size: 0.85rem;
+      }
+
+      .message.bot .message-content {
+        background: var(--secondary-color);
+        color: var(--text-primary);
+      }
+
+      .message.user .message-content {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .message-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+      }
+
+      .language-indicator {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        display: inline-block;
+        margin-top: 0.5rem;
+      }
+
+      .message.user .language-indicator {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .chat-input {
+        padding: 0.75rem;
+        border-top: 1px solid #eee;
+        width: 100%;
+      }
+
+      .input-container {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .input-container input {
+        flex: 1;
+        padding: 0.6rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--border-radius);
+        font-size: 0.85rem;
+        transition: var(--transition);
+        width: calc(100% - 100px); /* Leave space for send button */
+      }
+
+      .input-container input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      }
+
+      .send-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0 1rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+      }
+
+      .send-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .suggestions {
+        display: flex;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .suggestion-chip {
+        background: var(--secondary-color);
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .suggestion-chip:hover {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .input-mode-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .mode-btn {
+        padding: 0.4rem 0.8rem;
+        border: 1px solid var(--primary-color);
+        border-radius: var(--border-radius);
+        background: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.8rem;
+      }
+
+      .mode-btn.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .audio-input {
+        display: none;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .audio-input.active {
+        display: flex;
+      }
+
+      .record-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.8rem;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.85rem;
+      }
+
+      .record-btn:hover {
+        background: var(--primary-dark);
+        transform: scale(1.05);
+      }
+
+      .record-btn.recording {
+        animation: pulse 1.5s infinite;
+        background-color: var(--danger-color);
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+        }
+      }
+
+      .text-input {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .text-input.hidden {
+        display: none;
+      }
+
+      .welcome-message {
+        font-size: 0.85rem;
+      }
+      
+      /* Google Translate Styling */
+      .google-translate-container {
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .google-translate-container i {
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-right: 5px;
+      }
+
+      .goog-te-gadget {
+        font-family: "Poppins", sans-serif !important;
+        color: var(--text-primary) !important;
+        font-size: 0px !important; /* Hide Google branding text */
+      }
+
+      .goog-te-gadget .goog-te-combo {
+        padding: 2px 6px;
+        height: 26px;
+        border-radius: var(--border-radius);
+        border: 1px solid #e2e8f0;
+        font-size: 0.75rem;
+        color: var(--text-primary);
+        background-color: white;
+        cursor: pointer;
+        outline: none;
+        font-family: "Poppins", sans-serif;
+        transition: var(--transition);
+      }
+
+      .goog-te-gadget .goog-te-combo:hover {
+        border-color: var(--primary-color);
+      }
+
+      .goog-te-gadget .goog-te-combo:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.1);
+      }
+
+      /* Hide Google branding */
+      .goog-logo-link,
+      .goog-te-gadget span {
+        display: none !important;
+      }
+
+      .goog-te-banner-frame {
+        display: none !important;
+      }
+
+      .goog-te-menu-value {
+        color: var(--text-primary) !important;
+        text-decoration: none !important;
+      }
+
+      /* Top bar right section */
+      .top-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      @media (max-width: 1024px) {
+        .sidebar {
+          width: 160px;
+        }
+        .content {
+          margin-left: 160px;
+          width: calc(100% - 160px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 50px;
+          padding: 0.6rem 0.4rem;
+        }
+        .nav-link span {
+          display: none;
+        }
+        .content {
+          margin-left: 50px;
+          width: calc(100% - 50px);
+        }
+        .logo h2 {
+          display: none;
+        }
+        .search-container {
+          max-width: 160px;
+          margin: 0 0.45rem;
+        }
+        .user-info {
+          display: none;
+        }
+        .top-bar {
+          padding: 0 0.45rem;
+        }
+        .chat-container {
+          margin: 0;
+        }
+        .message {
+          max-width: 85%;
+        }.google-translate-container {
+          margin-right: 5px;
+        }
+        .google-translate-container i {
+          display: none;
+        }
+        .goog-te-gadget .goog-te-combo {
+          padding: 1px 4px;
+          font-size: 0.7rem;
+        }
+      }
+
+      /* Fix for Google Translate dropdown positioning */
+      body > .skiptranslate {
+        display: none;
+      }
+
+      /* Remove Google Translate top bar */
+      .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+      }
+      body {
+        top: 0 !important;
+      }
+    </style>
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+      }
+    </script>
+    <script
+      type="text/javascript"
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    ></script>
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="logo">
+        <i class="ri-leaf-line"></i>
+        <h2>Agri<span style="color: var(--primary-color)">Verse.</span></h2>
+      </div>
+      <div class="search-container">
+        <i class="ri-search-line"></i>
+        <input type="text" placeholder="Search..." />
+      </div>
+      <div class="top-bar-right">
+        <!-- Google Translate Element -->
+        <div class="google-translate-container">
+          <i class="ri-global-line"></i>
+          <div id="google_translate_element"></div>
+        </div>
+        <span class="welcome-message">Welcome, {{ session['username'] }}!</span>
+        <div class="user-avatar">{{ session['username'][0].upper() }}</div>
+        <button class="logout-btn">
+          <i class="ri-logout-box-r-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="/dashboard" class="nav-link">
+            <i class="ri-dashboard-line"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/newsletter" class="nav-link">
+            <i class="ri-compass-3-line"></i>
+            <span>Newsletter</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/chatbot" class="nav-link active">
+            <i class="ri-robot-line"></i>
+            <span>AgriBot</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/external" class="nav-link">
+            <i class="ri-line-chart-line"></i>
+            <span>External Trends</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/faqs" class="nav-link">
+            <i class="ri-home-smile-line"></i>
+            <span>FAQs</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <i class="ri-robot-line"></i>
+            <div>
+              <h2 class="mb-0">AgriBot</h2>
+              <p class="text-secondary mb-0">Your Agricultural Assistant</p>
+            </div>
+          </div>
+          <select id="preferredLanguage" class="language-select">
+            <option value="auto">Auto Detect</option>
+            <option value="en">English</option>
+            <option value="ur">Urdu</option>
+            <option value="pa">Punjabi</option>
+            <option value="sd">Sindhi</option>
+            <option value="ps">Pashto</option>
+            <option value="bal">Balochi</option>
+          </select>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="message bot">
+            <div class="message-content">
+              Assalam-o-Alaikum! I'm AgriBot, your agricultural assistant. How
+              can I help you today?
+            </div>
+            <div class="message-time"></div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <div class="input-mode-toggle">
+            <button class="mode-btn active" data-mode="text">
+              <i class="ri-message-3-line"></i> Text
+            </button>
+            <button class="mode-btn" data-mode="audio">
+              <i class="ri-mic-line"></i> Voice
+            </button>
+          </div>
+
+          <div class="text-input" id="textInput">
+            <input
+              type="text"
+              id="userInput"
+              placeholder="Type your message here..."
+            />
+            <button class="send-btn" onclick="sendMessage()">
+              <i class="ri-send-plane-fill"></i>
+              Send
+            </button>
+          </div>
+
+          <div class="audio-input" id="audioInput">
+            <button class="record-btn" id="recordBtn">
+              <i class="ri-mic-line"></i>
+            </button>
+            <span id="recordingStatus">Click to start recording</span>
+          </div>
+
+          <div class="suggestions">
+            <div class="suggestion-chip" onclick="useSuggestion(this)">
+              Crop prices
+            </div>
+            <div class="suggestion-chip" onclick="useSuggestion(this)">
+              Weather forecast
+            </div>
+            <div class="suggestion-chip" onclick="useSuggestion(this)">
+              Farming tips
+            </div>
+            <div class="suggestion-chip" onclick="useSuggestion(this)">
+              Cotton prices in Sindh
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let mediaRecorder, audioStream;
+      let audioChunks = [];
+      let isRecording = false;
+      let recordStartTime;
+      let recordingTimeout;
+
+      // Audio quality settings
+      const AUDIO_SETTINGS = {
+          sampleRate: 44100,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+      };
+
+      // Toggle between text/audio modes
+      document.querySelectorAll(".mode-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".mode-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const mode = btn.dataset.mode;
+          document
+            .getElementById("textInput")
+            .classList.toggle("hidden", mode === "audio");
+          document
+            .getElementById("audioInput")
+            .classList.toggle("active", mode === "audio");
+        });
+      });
+
+      // Recording timer display (MM:SS)
+      function updateTimer() {
+        const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+        const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const secs = String(elapsed % 60).padStart(2, "0");
+        document.getElementById("recordingStatus").textContent = `${mins}:${secs}`;
+      }
+
+      // Handle record button with enhanced error handling
+      document.getElementById("recordBtn").addEventListener("click", async () => {
+        if (!isRecording) {
+          try {
+            // Request audio stream with quality settings
+            audioStream = await navigator.mediaDevices.getUserMedia({
+              audio: AUDIO_SETTINGS
+            });
+
+            // Create MediaRecorder with quality settings
+            mediaRecorder = new MediaRecorder(audioStream, {
+              mimeType: 'audio/webm;codecs=opus',
+              audioBitsPerSecond: 128000
+            });
+
+            audioChunks = [];
+            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+            mediaRecorder.onstop = sendAudioBlob;
+            mediaRecorder.onerror = (e) => {
+              console.error("MediaRecorder error:", e);
+              stopRecording();
+              showError("Error recording audio. Please try again.");
+            };
+
+            // Start recording
+            mediaRecorder.start(1000); // Collect data every second
+            isRecording = true;
+            recordStartTime = Date.now();
+            document.getElementById("recordBtn").classList.add("recording");
+            updateTimer();
+            window._timerInterval = setInterval(updateTimer, 500);
+
+            // Set maximum recording time (5 minutes)
+            recordingTimeout = setTimeout(() => {
+              if (isRecording) {
+                stopRecording();
+                showError("Maximum recording time reached (5 minutes)");
+              }
+            }, 5 * 60 * 1000);
+
+          } catch (err) {
+            console.error("Error accessing microphone:", err);
+            showError("Please allow microphone access and ensure it's working properly.");
+          }
+        } else {
+          stopRecording();
+        }
+      });
+
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          isRecording = false;
+          clearInterval(window._timerInterval);
+          clearTimeout(recordingTimeout);
+          if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+          }
+          document.getElementById("recordBtn").classList.remove("recording");
+          document.getElementById("recordingStatus").textContent = "Click to start recording";
+        }
+      }
+
+      function showError(message) {
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message";
+        errorDiv.textContent = message;
+        document.querySelector(".chat-input").prepend(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+
+      async function sendAudioBlob() {
+        const blob = new Blob(audioChunks, { type: "audio/webm;codecs=opus" });
+        const form = new FormData();
+        form.append("file", blob, "recording.webm");
+        form.append(
+          "preferred_language",
+          document.getElementById("preferredLanguage").value
+        );
+
+        const loading = addMessage("bot", "Processing audio...");
+        try {
+          const res = await fetch("/api/chat", { 
+            method: "POST", 
+            body: form,
+            timeout: 30000 // 30 second timeout
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          loading.remove();
+          
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Display recognized text with language indicator
+          addMessage(
+            "user",
+            data.transcript +
+              (data.detected_language ? ` (${data.detected_language})` : "")
+          );
+
+
+          // Bot response
+          addMessage("bot", data.response);
+        } catch (e) {
+          console.error("Error:", e);
+          loading.querySelector(".message-content").textContent =
+            "Error processing audio. Please try again.";
+        }
+      }
+
+      async function sendMessage() {
+        const input = document.getElementById("userInput");
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = "";
+        addMessage("user", msg);
+        const loading = addMessage("bot", "Thinking...");
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "text",
+              message: msg,
+              preferred_language:
+                document.getElementById("preferredLanguage").value,
+            }),
+          });
+          const data = await res.json();
+          loading.remove();
+          if (data.error) throw new Error(data.error);
+          addMessage("bot", data.response);
+        } catch (e) {
+          console.error(e);
+          loading.querySelector(".message-content").textContent =
+            "Error connecting to server.";
+        }
+      }
+
+      function addMessage(type, text) {
+        const messagesDiv = document.getElementById("chatMessages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${type}`;
+
+        messageDiv.innerHTML = `
+          <div class="message-content">${text}</div>
+          <div class="message-time">${getCurrentTime()}</div>
+        `;
+
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return messageDiv;
+      }
+
+      function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function useSuggestion(element) {
+        const input = document.getElementById("userInput");
+        input.value = element.textContent.trim();
+        input.focus();
+      }
+
+      // Add enter key listener
+      document
+        .getElementById("userInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        });
+
+      // Add logout functionality
+      document
+        .querySelector(".logout-btn")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+          const confirmLogout = confirm("Are you sure you want to logout?");
+          if (confirmLogout) {
+            window.location.href = "{{ url_for('logout') }}";
+          }
+        });
+    </script>
+  </body>
+</html>
