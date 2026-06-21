@@ -18,6 +18,10 @@ It's a working example of wiring an LLM into a real data and forecasting pipelin
 
 ![AgriVerse overview](docs/overview.png)
 
+**AgriBot — the LLM crop advisor (text or voice)**
+
+![AgriBot agricultural assistant chat interface](docs/agribot.png)
+
 **Regional price analysis — actual vs. predicted prices**
 
 ![Regional price analysis with actual vs predicted price trends](docs/forecasting.png)
