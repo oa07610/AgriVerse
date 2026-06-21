@@ -16,10 +16,15 @@ It's a working example of wiring an LLM into a real data and forecasting pipelin
 
 ## Demo
 
-<!-- Add a screenshot or short GIF — the advice view plus a forecast chart works well here. -->
-<!-- ![AgriVerse advice and forecast](docs/demo.gif) -->
+![AgriVerse overview](docs/overview.png)
 
-_Screenshot / demo GIF coming soon._
+**Regional price analysis — actual vs. predicted prices**
+
+![Regional price analysis with actual vs predicted price trends](docs/forecasting.png)
+
+**Price distribution heatmap across stations**
+
+![Price distribution heatmap over Pakistan](docs/price-heatmap.png)
 
 ## How it works
 
